@@ -1,0 +1,1 @@
+README for Twitter Scope iPad application. This project displays Twitter results for a keyword or phrase search using the Twitter API, HTML5 and Processing compiled using PhoneGap for display on an iPad or iPhone.
