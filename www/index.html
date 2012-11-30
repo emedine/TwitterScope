@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title></title>
+  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+	<meta charset="utf-8">
+
+
+	<!-- iPad/iPhone specific css below, add after your main css >
+	<link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />		
+	<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />		
+	-->
+	<!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+        
+    <script type="text/javascript" charset="utf-8" src="cordova-1.7.0.js"></script>
+    <script src="js/processing.js" type="text/javascript"></script>
+  	<script src="js/processing-twitter.js" type="text/javascript"></script>
+    <script type="text/javascript" src="js/jscolor/jscolor.js"></script>
+    <script type="text/javascript">
+	// If you want to prevent dragging, uncomment this section
+	/*
+	function preventBehavior(e) 
+	{ 
+      e.preventDefault(); 
+    };
+	document.addEventListener("touchmove", preventBehavior, false);
+	*/
+	
+	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
+	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
+	for more details -jm */
+	/*
+	function handleOpenURL(url)
+	{
+		// TODO: do something with the url passed in.
+	}
+	*/
+	
+	function onBodyLoad()
+	{		
+		document.addEventListener("deviceready", onDeviceReady, false);
+	}
+	
+	/* When this function is called, Cordova has been initialized and is ready to roll */
+	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
+	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
+	for more details -jm */
+	function onDeviceReady()
+	{
+		
+       
+	}
+    /// INTERFACE FUNCTIONS
+    var theOverlay;
+    function showOverlay(theID){
+        theOverlay = document.getElementById("interface");
+        theOverlay.style.display = "block";
+        console.log("SHOW OVERLAY");
+            
+    }
+    function hideOverlay(){
+        theOverlay = document.getElementById("interface");
+        theOverlay.style.display = "none";
+        console.log("HIDE OVERLAY");
+    }
+        
+    /// Processing control functions
+    var processingInstance;
+    function testCom() {
+      if (!processingInstance) {
+          processingInstance = Processing.getInstanceById('tweets');
+        }
+           
+           processingInstance.checkConsoleLog(); // stop animation, call noLoop()
+      }
+    
+    </script>
+  </head>
+  <body onLoad="onBodyLoad()">
+  <!--
+  A port of http://blog.blprnt.com/blog/blprnt/updated-quick-tutorial-processing-twitter by Jer Thorp's
+  Processing Twitter demo. The twitter API is exposed to Processing.js via a JavaScript library. I
+  built this for a demo today, it's not really production quality, but could be refined to be used 
+  as such.  Click the sketch to have the word list reload from fresh tweets.
+  -->
+  <script id='sketch' type="application/processing">
+     
+    ArrayList<String> words = new ArrayList();
+
+    // Global ArrayList of tweets is created in processing-twitter.js
+    // ArrayList<Tweet> tweets = new ArrayList();
+
+    // A class representing a Tweet.  Tweet objects are created in JS
+    // and automatically placed in the tweets ArrayList (created in JS)
+      
+    /// GLOBAL PROPERTIES
+      int tWidth = 1024;
+      int tHeight = 768;
+      color bgColor = #000000;
+      color tFontColor = #FFFFFF;
+      
+      boolean hasTweets = false;
+      
+      //// text objects
+      ArrayList<TextSpawn> TextObjectArray =  new ArrayList();
+      // each objects size is stored in an array
+      // for some reason Processing wants to reset the text sizes
+      	int[] TextSizes;
+        int[] TextPosY;
+      
+      /// ANIMATION PRESETS
+      // scroll
+      int vSpacing = 20;
+      int tweetTextSize = 24;
+      
+    class Tweet {
+      public String id;
+      public String profileName;
+      public String profileImageUrl;
+      public String text;
+      public Date time;
+    }
+
+    void startTweets(){
+        console.log("TWITTER IS READY: PING");
+        // loadTweets('@ladygaga');
+
+          
+    }
+    void setup() {
+      // XXX: jbuck: "just subtract 10"
+	  size(1024, 768);
+        
+      colorMode(RGB, 100);
+        
+
+      /// size(window.innerWidth, window.innerHeight-10);
+      background(bgColor);
+      smooth();
+
+      // Slow things down a bit...
+      frameRate(30);
+
+      // Start a live feed loading, results will be available in a global
+      // ArrayList called tweets.  loadTweets() is a custom method added
+      // by processing-twitter.js 
+      loadTweets('ladygaga');
+
+      // You can also pass geolocation data to limit tweets to a geographic area
+      // loadTweets('class', '43.7496,-79.4886,1km'); // York University
+        spawnText();
+        // set text sizes, pre-populate the array
+        TextSizes = new int[100];
+        TextPosY = new int[100];
+		TextSizes[0] = tweetTextSize;
+        
+    }
+      
+      /// does the initial spawn
+      void spawnText(){
+          // If we haven't created the text objects, do it now
+          if (tweets.size() > 0){
+          for (int i = 0; i < tweets.size(); i++) {
+              Tweet t = (Tweet) tweets.get(i);
+              String msg = t.text;
+              String usrName = t.profileName;
+              console.log("Name: " + t.profileName);
+              
+              //// ADD TEXT SPAWN
+              theTextObject = new TextObject();
+              TextSizes[i] = tweetTextSize;
+              
+              theTextObject.initText(msg, usrName, TextSizes[i]);
+              theTextObject.theY = i * vSpacing;
+              TextObjectArray.add(theTextObject);
+              if(i>0){
+                  hasTweets = true;
+              }
+          }
+          tweets.clear();
+          }
+          
+      }
+
+    void draw() {
+        background(bgColor);
+         // CHECK FOR TWITTER DATA
+        // if none, spawn the text object
+        if (!hasTweets) {
+            spawnText(); 
+        }
+        /// animate text objects
+        for (int i = 0; i < TextObjectArray.size(); i++){
+            try{
+                // update size
+                int dSize = TextSizes[i];
+                /*
+                // get old y position
+                int tY =  TextPosY[i];
+                /// increment
+                tY += 10;
+                if(tY > tHeight){
+                    tY = vSpacing * -1;
+                } else {
+                    tY = -20;
+                }
+                TextPosY[i]=tY;
+                 */
+                // update text object position
+                TextObject dTextObj = TextObjectArray.get(i);
+                // dTextObj.updateTweet(dSize, vSpacing * i);
+                dTextObj.updateTweet(dSize);
+                
+            } catch (Exception e){
+                println("WTF?" + e);
+            }
+        }
+       
+    }
+
+       //// INTERFACE FUNCTIONS
+    
+    // show or hide interface
+      // Rebuild the word list when the user clicks
+      void mousePressed() {
+          // background(0);
+          // tweets.clear();
+          // words.clear();
+          
+          
+          /// show overlay
+          window.showOverlay();
+          console.log("YOU CLICKED THE WINDOW");
+      }
+      /// change colors
+      void changeBGColor(String theColor){
+          string dColor = theColor;
+          color hi = unhex("FF" + dColor);
+          bgColor = hi;
+          
+      }
+      void changeFontColor(int theColor){
+          string dColor = theColor;
+          color hi = unhex("FF" + dColor);
+          tFontColor = hi;
+         
+      }
+      // array with all the different styles
+      // pick a style
+      // pass it to the text object
+      // let the text object position itself
+
+      void changeAnimationType(){
+          
+          
+      }
+ 
+      
+    ///// DEVICE FUNCTIONS
+      // stop app when hit home
+      
+      // geolocation filter
+      
+      /// wifi checker
+      
+    ///// MESSAGING FUNCTIONS
+        
+      /// error message
+        // on
+        // off
+      
+    //// TEXT OBJECT /////////
+      // /*
+      class TextObject {
+          String tweetText = "";
+          String tweetName = "";
+          Boolean textDirection;
+          int tSize= 24;
+          int tSpacing = 20;
+          int tId;
+          color textColor;
+          
+          /// positioning
+          private int theX = 0;
+          private int theY = 0;
+          
+          /// fonts
+          PFont SanSerif;
+          PFont fontOne;
+          PFont fontTwo;
+          
+          void initText(String theTweet, String theName, int theSize){
+              
+              tweetText = theTweet;
+              tweetName = theName;
+              /// set the size
+              int tSize= theSize;
+              /// set the opacity
+              // console.log("TEXT OBJECT NAME: " + tweetName);
+              /// set the color
+              
+                            
+              // theX = 150;
+               
+          }
+          
+          ///*
+          
+          public void updateTweet(int xsize){
+              // check size, alignment, color
+              tSize = xsize;
+              textAlign(LEFT);
+              fill(tFontColor);
+              text(tweetText, theX, theY);
+              textSize(tSize);
+              
+              // move
+              //*
+              theY += 2;
+              if(theY >= tHeight){
+                  
+                  theY = -30;
+              }
+              //*/
+              
+          }
+          
+      }
+       // end text object ///////
+      
+   // */
+      
+      
+  </script>
+      <canvas id="tweets">
+          <p>Please upgrade your browser to something newer, like <a href="http://chrome.google.com" target="_blank">Google Chrome</a></p>
+      </canvas>
+
+        <div id="interface">
+            Change Background:<br>
+            <input class="color" onchange="Processing.getInstanceById('tweets').changeBGColor(this.color)">
+            Change Font:<br>
+                <input class="color" onchange="Processing.getInstanceById('tweets').changeFontColor(this.color)">
+            <a href="#" onClick="hideOverlay(); return false;">Hide Interface</a>
+        </div>
+</html>

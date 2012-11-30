@@ -1,0 +1,208 @@
+@charset "UTF-8";
+
+
+/* ==== Scroll down to find where to put your styles :) ==== */
+
+/*  HTML5 ‚Äö√Ñ√∂‚àö‚à´‚Äö√†√ª Boilerplate  */
+
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp,
+small, strong, sub, sup, var, b, i, dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+
+blockquote, q { quotes: none; }
+blockquote:before, blockquote:after,
+q:before, q:after { content: ''; content: none; }
+ins { background-color: #ff9; color: #000; text-decoration: none; }
+mark { background-color: #ff9; color: #000; font-style: italic; font-weight: bold; }
+del { text-decoration: line-through; }
+abbr[title], dfn[title] { border-bottom: 1px dotted; cursor: help; }
+table { border-collapse: collapse; border-spacing: 0; }
+hr { display: block; height: 1px; border: 0; border-top: 1px solid #ccc; margin: 1em 0; padding: 0; }
+input, select { vertical-align: middle; }
+
+body { 
+    font-family: Helvetica, Arial, sans-serif; 
+    font-size: 12px; 
+    margin: 0;
+    padding: 0;
+    background: black;
+}
+select, input, textarea, button { font:99% sans-serif; }
+pre, code, kbd, samp { font-family: monospace, sans-serif; }
+
+a:hover, a:active { outline: none; }
+ul, ol { margin: 0; padding: 0; }
+ol { list-style-type: decimal; }
+ul, li { margin: 0; list-style:none; list-style-image: none; }
+small { font-size: 85%; }
+strong, th { font-weight: bold; }
+td { vertical-align: top; }
+
+sub, sup { font-size: 75%; line-height: 0; position: relative; }
+sup { top: -0.5em; }
+sub { bottom: -0.25em; }
+
+pre { white-space: pre; white-space: pre-wrap; word-wrap: break-word; padding: 15px; }
+textarea { overflow: auto; }
+.ie6 legend, .ie7 legend { margin-left: -7px; }
+input[type="radio"] { vertical-align: text-bottom; }
+input[type="checkbox"] { vertical-align: bottom; }
+.ie7 input[type="checkbox"] { vertical-align: baseline; }
+.ie6 input { vertical-align: text-bottom; }
+label, input[type="button"], input[type="submit"], input[type="image"], button { cursor: pointer; }
+button, input, select, textarea { margin: 0; }
+input:valid, textarea:valid   {  }
+input:invalid, textarea:invalid { border-radius: 1px; -moz-box-shadow: 0px 0px 5px red; -webkit-box-shadow: 0px 0px 5px red; box-shadow: 0px 0px 5px red; }
+.no-boxshadow input:invalid, .no-boxshadow textarea:invalid { background-color: #f0dddd; }
+
+::-moz-selection{ background: #FF5E99; color:#fff; text-shadow: none; }
+::selection { background:#FF5E99; color:#fff; text-shadow: none; }
+a:link { -webkit-tap-highlight-color: #FF5E99; }
+
+button {  width: auto; overflow: visible; }
+.ie7 img { -ms-interpolation-mode: bicubic; }
+
+body, select, input, textarea {  color: #fff; }
+h1, h2, h3, h4, h5, h6 { font-weight: bold; }
+a, a:active, a:visited { color: #cccccc; }
+a:hover { color: #ffffff; }
+
+/*
+    // ========================================== \\
+   ||                                              ||
+   ||               Your styles !                  ||
+   ||                                              ||
+    \\ ========================================== //
+*/
+
+
+
+body {}
+p { margin-bottom: 1em; }
+a { text-decoration: none; }
+
+
+#header {
+	margin:0 auto;
+	text-align: center;
+	width:1024px;
+	height:170px;
+	background: url('../images/bground_top.png') no-repeat;
+	position:relative;
+
+}
+#content {
+	width:1024px;
+	margin: 0 auto;
+	padding-top: 0px;
+	text-align: center;
+	height:400px;
+	position:relative;
+
+}
+
+#container {
+	width: 1024px;
+    height:768px;
+	position:absolute;
+    left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	margin: 0px;
+	border: 0px;
+}
+
+#canvas {
+
+}
+
+
+#interface{
+    padding-left:20px;
+    padding-top:20px;
+    width:1024px;
+	margin: 0 auto;
+	min-height:200px;
+    position:absolute; 
+    top:500px;
+    left: 0px;
+    background: url('../images/interface_bground.png') no-repeat;
+    
+}
+
+
+#footer {
+	clear: both;
+}
+
+
+/* nav positioning */
+#playernav{
+
+
+}
+ul#playernav li {
+	margin-top:8px;
+	float: left;
+	text-align: left;
+}
+#buttonPlayPause{
+	width: 150px;
+	margin-top:10px;
+	background: url('../images/play_pause.png') no-repeat;
+}
+#buttonQuit{
+	width: 148px;
+	margin-top:10px;
+
+	position:absolute;
+	background: url('../images/quit.png') no-repeat;
+
+}
+#buttonJump{
+	width: 305px;
+	background: url('../images/arrow.png') no-repeat;
+}
+#buttonL{
+	width: 135px;
+	background: url('../images/left.png') no-repeat;
+}
+#buttonR{
+	width: 135px;
+	background: url('../images/right.png') no-repeat;
+}
+#buttonJ{
+	width: 171px;
+	background: url('../images/jump_up.png') no-repeat;
+}
+
+
+ul#playernav a { color: #808080; }
+ul#playernav a:hover { color: #fff; }
+ul#playernav a div { height: 184px; margin-bottom: 20px; opacity: 1; }
+ul#playernav a:hover div { opacity: 1; }
+ul#playernav div#buttonL {center bottom no-repeat; }
+ul#playernav div#buttonR {center bottom no-repeat; }
+ul#playernav div#buttonJ {center bottom no-repeat; }
+ul#playernav div#buttonS {center bottom no-repeat; }
+ul#playernav div#buttonStart {center bottom no-repeat; }
+/* ul#playernav div#ultimateLogo { background: url('../images/07_tv/thumbnails/Campaign5_Ultimate_in_Entertainment.jpg') center bottom no-repeat; } */
