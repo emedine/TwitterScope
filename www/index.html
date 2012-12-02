@@ -55,6 +55,7 @@
 	}
     /// INTERFACE FUNCTIONS
     var theOverlay;
+    // show and hide
     function showOverlay(theID){
         theOverlay = document.getElementById("interface");
         theOverlay.style.display = "block";
@@ -67,7 +68,7 @@
         console.log("HIDE OVERLAY");
     }
         
-    /// Processing control functions
+    /// Processing control functions ////
     var processingInstance;
     function testCom() {
       if (!processingInstance) {
@@ -76,6 +77,14 @@
            
            processingInstance.checkConsoleLog(); // stop animation, call noLoop()
       }
+    
+    /// speed slider
+    function showValue(newValue){
+    	/// document.getElementById("range").innerHTML=newValue;
+    	processingInstance = Processing.getInstanceById('tweets');
+    	processingInstance.changeAnimSpeed(newValue);
+    	
+    }
     
     </script>
          </head>
@@ -101,20 +110,35 @@
       int tHeight = 768;
       color bgColor = #000000;
       color tFontColor = #FFFFFF;
+	  int tAnimSpeed = 2;
+	  int curNumTweets;
       
       boolean hasTweets = false;
       
-      //// text objects
+      //// text object
       ArrayList<TextSpawn> TextObjectArray =  new ArrayList();
       // each objects size is stored in an array
       // for some reason Processing wants to reset the text sizes
-      	int[] TextSizes;
-        int[] TextPosY;
+      int[] TextSizes;
+      int[] TextPosY;
+	 float oldLineHeight;
+	 float newLineHeight;
+	 int curTextID; /// id for texxt objedt to be faded
+
+ 	/// fonts
+      PFont BasicFont = createFont("Arial", 24, true);;
+      PFont SanSerif;
+      PFont fontOne;
+      PFont fontTwo;
+
+	
       
       /// ANIMATION PRESETS
       // scroll
-      int vSpacing = 20;
+      int vSpacing = 40;
       int tweetTextSize = 24;
+	  string animationType = "fade";
+	  boolean fadeOutReady = false;
       
     class Tweet {
       public String id;
@@ -164,6 +188,8 @@
           // If we haven't created the text objects, do it now
           if (tweets.size() > 0){
           for (int i = 0; i < tweets.size(); i++) {
+			// reset vspacing
+			vSpacing = 40;
               Tweet t = (Tweet) tweets.get(i);
               String msg = t.text;
               String usrName = t.profileName;
@@ -173,14 +199,27 @@
               theTextObject = new TextObject();
               TextSizes[i] = tweetTextSize;
               
+			  // do all the spacing
+			  // this will have to be reset somewhere
+
+			  int numChars = msg.length();
+			  // console.log("TWEET: " + msg + " numChars: " + numChars);
+			  if (numChars > 30 && numChars <60 ){
+				vSpacing = vSpacing*2;
+			  }
+			  if(numChars>=60){
+				vSpacing = vSpacing*3;
+				}
               theTextObject.initText(msg, usrName, TextSizes[i]);
+			  /// space the objects with v spacing + the line height
+			  theTextObject.tId = i;
               theTextObject.theY = i * vSpacing;
               TextObjectArray.add(theTextObject);
-              if(i>0){
-                  hasTweets = true;
-              }
           }
+          console.log("NUM TWEET OBJECTS: " + TextObjectArray.size() + " NUM TWEETS: " + tweets.size());
+          curNumTweets =  tweets.size();
           tweets.clear();
+		  hasTweets = true;
           }
           
       }
@@ -192,32 +231,26 @@
         if (!hasTweets) {
             spawnText(); 
         }
-        /// animate text objects
+
+		/// fade text objects
+		doTextObjectFade();
+		
+        /// scroll text objects
+		/*
         for (int i = 0; i < TextObjectArray.size(); i++){
             try{
                 // update size
                 int dSize = TextSizes[i];
-                /*
-                // get old y position
-                int tY =  TextPosY[i];
-                /// increment
-                tY += 10;
-                if(tY > tHeight){
-                    tY = vSpacing * -1;
-                } else {
-                    tY = -20;
-                }
-                TextPosY[i]=tY;
-                 */
                 // update text object position
                 TextObject dTextObj = TextObjectArray.get(i);
-                // dTextObj.updateTweet(dSize, vSpacing * i);
-                dTextObj.updateTweet(dSize);
+                // dTextObj.doAnim(dSize, vSpacing * i);
+                dTextObj.doAnim(dSize);
                 
             } catch (Exception e){
                 println("WTF?" + e);
             }
         }
+		*/
        
     }
 
@@ -246,20 +279,67 @@
 
       void changeFontColor(int theColor){
           string dColor = theColor.substring(1);
-          color hi = unhex("FF" + dColor);
-          tFontColor = hi;
+          color newColor = unhex("FF" + dColor);
+          tFontColor = newColor;
          
       }
+	  // change speed
+	  void changeAnimSpeed(String newValue){
+		int dAnim = int(newValue);
+          tAnimSpeed = dAnim;
+			console.log("SLIDER: " + tAnimSpeed);
+		}
       // array with all the different styles
       // pick a style
       // pass it to the text object
       // let the text object position itself
 
-      void changeAnimationType(){
-          
+      void changeAnimationType(string tType){
+		animationType = tType;
+        switch(animationType) {
+  		case 'fade': 
+    		fadeIn();
+    		break;
+  		case 'scroll': 
+    		println("scroll");  // Prints "Bravo"
+    		break;
+  		case 'wipe': 
+    		println("wipe");  // Prints "Bravo"
+    		break;
+ 		 default:
+    		break;
+		}
+		
+
           
       }
- 
+	
+	///// ANIMATE TEXT OBJECT
+	public void doTextObjectFade(){
+ 		for (int i = 0; i < TextObjectArray.size(); i++){
+            try{
+                
+                // update text object position
+                TextObject dTextObj = TextObjectArray.get(i);
+                if(i == curTextID){
+					// console.log("FADING: " + curTextID);
+
+					// init fade
+					if(!dTextObj.hasFaded){
+						dTextObj.fadeIn = true;
+					}
+                	dTextObj.doFade();
+				} else {
+                	dTextObj.fadeIn = false; /// make all other text objects invisible
+					dTextObj.fadeHold = false;
+					dTextObj.fadeOut = false;
+				}
+                
+            } catch (Exception e){
+                println("WTF?" + e);
+            }
+        }	
+	}
       
     ///// DEVICE FUNCTIONS
       // stop app when hit home
@@ -283,17 +363,22 @@
           int tSize= 24;
           int tSpacing = 20;
           int tId;
-          color textColor;
-          
+		  int fadeLevel = 0;
+          color fadeColor = (255,255,255,fadeLevel);
+
+          //// TIMER
+		  Timer timer;
+
           /// positioning
           private int theX = 0;
           private int theY = 0;
           
-          /// fonts
-          PFont SanSerif;
-          PFont fontOne;
-          PFont fontTwo;
-          
+		  /// fade states
+		  boolean fadeIn = false;
+		  boolean fadeHold = false;      
+		  boolean fadeOut = false;
+		  boolean hasFaded = false;
+     
           void initText(String theTweet, String theName, int theSize){
               
               tweetText = theTweet;
@@ -302,38 +387,134 @@
               int tSize= theSize;
               /// set the opacity
               // console.log("TEXT OBJECT NAME: " + tweetName);
-              /// set the color
-              
-                            
-              // theX = 150;
                
           }
+
+		  /// do fade animation
+		  public void doFade(){
+			/// set position
+			 if(fadeIn){ //// fading in
+				fadeLevel +=10;
+				if(fadeLevel > 255){
+					hasFaded = true;
+					fadeIn = false;
+					fadeHold = true;
+					fadeOut = false;
+					/// start hold timer
+					timer = new Timer(5000);
+					timer.start();
+					console.log("DONE FADE IN, HOLDING" + fadeHold + " " + tId + " "  + fadeOut);
+				}
+				
+
+			} 
+			if (fadeHold){  /// fadeHold
+					/// check hold timer status
+					/// if it's run out, fade out
+ 					if (timer.isFinished()) {
+						fadeIn = false;
+						fadeHold = false;
+						fadeOut = true;
+						console.log("DONE HOLDING, FADING OUT");
+					}
+
+
+			}
+			if (fadeOut){ //// fade out
+				fadeLevel -=10;
+				if(fadeLevel <=0){
+					console.log("DONE FADING OUT");
+					fadeIn = true;
+					fadeHold = false;
+					fadeOut = false;
+
+					/// check to see if we've faded all of them
+					/// then reset the fade id
+					if(curTextID < curNumTweets){
+						curTextID +=1;
+						hasFaded = false;
+					} else if(curTextID >= curNumTweets){
+						console.log("FADED ALL LOOPS< RESETTING");
+						curTextID = 0;
+						hasFaded = false;
+					}
+					
+				}
+
+
+			}
+			  //// unhex the current font color
+			  fadeColor = color(tFontColor,fadeLevel);
+              fill(fadeColor);
+ 			  textAlign(CENTER);
+			  textFont(BasicFont,tSize);
+              // text(tweetText, theX, theY, 1024, 200);
+			  text(tweetText, 45, 375, 979, 200);
+              textSize(tSize);
+              textWidth(1024);
+
+
+		  }
           
-          ///*
+          ///* do scrolling animation
           
-          public void updateTweet(int xsize){
+          public void doAnim(int xsize){
               // check size, alignment, color
               tSize = xsize;
-              textAlign(LEFT);
+              textAlign(CENTER);
+			  textFont(BasicFont,tSize);
               fill(tFontColor);
-              text(tweetText, theX, theY);
+			  // text(s, 10, 10, 70, 80);
+			  // text(tweetText, theX, theY);
+              text(tweetText, theX, theY, 1024, 200);
               textSize(tSize);
+              textWidth(1024);
               
-              // move
-              //*
-              theY += 2;
+			  // move
+              theY += tAnimSpeed;
               if(theY >= tHeight){
                   
                   theY = -30;
               }
-              //*/
+              
+			  
               
           }
           
       }
        // end text object ///////
       
-   // */
+   // TIMER CLASS ////////
+class Timer {
+ 
+  int savedTime; // When Timer started
+  int totalTime; // How long Timer should last
+  
+  Timer(int tempTotalTime) {
+    totalTime = tempTotalTime;
+  }
+  
+  // Starting the timer
+  void start() {
+    // When the timer starts it stores the current time in milliseconds.
+	console.log("STARTING TIMER");
+    savedTime = millis(); 
+  }
+  
+  // The function isFinished() returns true if 5,000 ms have passed. 
+  // The work of the timer is farmed out to this method.
+  boolean isFinished() { 
+    // Check how much time has passed
+    int passedTime = millis()- savedTime;
+    if (passedTime > totalTime) {
+      return true;
+    } else {
+      return false;
+    }
+   }
+   
+ }
+
       
       
   </script>
@@ -342,28 +523,55 @@
       </canvas>
 
         <div id="interface">
-            <!-- background color picker !-->
-            <div class="cp-default">
-                <div class="picker-wrapper">
-                    <div class="picker"></div>
-                    <div class="picker-indicator"></div>
-                </div>
-                <div class="slide-wrapper">
-                    <div class="slide"></div>
-                    <div class="slide-indicator"></div>
-                </div>
-            </div>
-            <!-- font color picker !-->
-            <div id="spacerdiv" style="width:25px;">BIG SPACE</div>
-            <div class="cp-default">
-                <div class="picker-wrapper">
-                    <div class="picker"></div>
-                    <div class="picker-indicator"></div>
-                </div>
-                <div class="slide-wrapper">
-                    <div class="slide"></div>
-                    <div class="slide-indicator"></div>
-                </div>
+        <div id="header_label"><a href="#"><img src="images/header.png" width="253" height="33"></a></div>
+        <div id="closeButton"><a href="#" onClick="hideOverlay(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a></div>
+        <div id="searchterm"><img src="images/butt_search_term.png" width="175" height="23"><input type="search" name="twittersearch" size="73" /></div>
+        <div id="speedslider"><img src="images/butt_speed.png" width="97" height="23"><input type="range" min="0" max="20" value="5" step="1" onchange="showValue(this.value)"/></div>
+        <div id="animation_type"><img src="images/animation.png" width="151" height="23"> 
+	        <select>
+			<option value ="scroll" selected>Scroll</option>
+			<option value ="fade">Fade</option>
+			<option value ="wipe" >Wipe</option>
+			</select>
+		</div>
+        
+        
+        <!-- 
+       
+!-->
+           <div>
+           <ul id="colorpicker_container">
+	            <!-- background color picker !-->
+	            <li>
+	            <img src="images/butt_bgcolor.png" width="213" height="23" >
+	            <br>
+	            <div class="cp-default" style="margin-top:10px;">
+	                <div class="picker-wrapper">
+	                    <div class="picker"></div>
+	                    <div class="picker-indicator"></div>
+	                </div>
+	                <div class="slide-wrapper">
+	                    <div class="slide"></div>
+	                    <div class="slide-indicator"></div>
+	                </div>
+	            </div>
+	            </li>
+	            <!-- font color picker !-->
+	            <li>
+	             <img src="images/butt_fontocolor.png" width="121" height="23">
+	            <br>
+	            <div class="cp-default"  style="margin-top:10px;"">
+	                <div class="picker-wrapper">
+	                    <div class="picker"></div>
+	                    <div class="picker-indicator"></div>
+	                </div>
+	                <div class="slide-wrapper">
+	                    <div class="slide"></div>
+	                    <div class="slide-indicator"></div>
+	                </div>
+	            </div>
+	            </li>
+	        </ul>
             </div>
             <!-- COLOR PICKER CODE !-->
             
@@ -417,13 +625,7 @@
                  */
                 </script>
 
-            <!-- 
-            Change Background:<br>
-            <input class="color" onchange="Processing.getInstanceById('tweets').changeBGColor(this.color)">
-            Change Font:<br>
-                <input class="color" onchange="Processing.getInstanceById('tweets').changeFontColor(this.color)">
-             
-             !-->
-            <a href="#" onClick="hideOverlay(); return false;">Hide Interface</a>
+            
+           
         </div>
 </html>
