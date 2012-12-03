@@ -86,6 +86,13 @@
     	
     }
     
+    function changeAnim(animType){
+    	processingInstance = Processing.getInstanceById('tweets');
+    	processingInstance.changeAnimationType(animType);
+    	console.log("ACTIVATING ANIM CHANGE" + animType);
+    	
+    }
+    
     </script>
          </head>
   <body onLoad="onBodyLoad()">
@@ -137,7 +144,7 @@
       // scroll
       int vSpacing = 40;
       int tweetTextSize = 24;
-	  string animationType = "fade";
+	  string animationType = "scroll"; // "fade", "wipeleft", "wiperight", "random"
 	  boolean fadeOutReady = false;
       
     class Tweet {
@@ -232,25 +239,7 @@
             spawnText(); 
         }
 
-		/// fade text objects
-		doTextObjectFade();
-		
-        /// scroll text objects
-		/*
-        for (int i = 0; i < TextObjectArray.size(); i++){
-            try{
-                // update size
-                int dSize = TextSizes[i];
-                // update text object position
-                TextObject dTextObj = TextObjectArray.get(i);
-                // dTextObj.doAnim(dSize, vSpacing * i);
-                dTextObj.doAnim(dSize);
-                
-            } catch (Exception e){
-                println("WTF?" + e);
-            }
-        }
-		*/
+		doTextObjectAnim();
        
     }
 
@@ -293,15 +282,21 @@
       // pick a style
       // pass it to the text object
       // let the text object position itself
+		
 
-      void changeAnimationType(string tType){
-		animationType = tType;
+	  void changeAnimationType(String animType){
+		animationType = animType;
+		console.log("SWITCH animationType CASE");
+	  }
+
+      void doTextObjectAnim(){
+		// animationType = tType;
         switch(animationType) {
   		case 'fade': 
-    		fadeIn();
+    		doTextObjectFade();
     		break;
   		case 'scroll': 
-    		println("scroll");  // Prints "Bravo"
+			doTextObjectScroll();
     		break;
   		case 'wipe': 
     		println("wipe");  // Prints "Bravo"
@@ -339,6 +334,23 @@
                 println("WTF?" + e);
             }
         }	
+	}
+
+	public void doTextObjectScroll(){
+		for (int i = 0; i < TextObjectArray.size(); i++){
+            try{
+                // update size
+                int dSize = TextSizes[i];
+                // update text object position
+                TextObject dTextObj = TextObjectArray.get(i);
+                // dTextObj.doAnim(dSize, vSpacing * i);
+                dTextObj.doAnim(dSize);
+                
+            } catch (Exception e){
+                println("WTF?" + e);
+            }
+        }
+
 	}
       
     ///// DEVICE FUNCTIONS
@@ -456,7 +468,7 @@
 
 		  }
           
-          ///* do scrolling animation
+          /// do scrolling animation
           
           public void doAnim(int xsize){
               // check size, alignment, color
@@ -528,10 +540,12 @@ class Timer {
         <div id="searchterm"><img src="images/butt_search_term.png" width="175" height="23"><input type="search" name="twittersearch" size="73" /></div>
         <div id="speedslider"><img src="images/butt_speed.png" width="97" height="23"><input type="range" min="0" max="20" value="5" step="1" onchange="showValue(this.value)"/></div>
         <div id="animation_type"><img src="images/animation.png" width="151" height="23"> 
-	        <select>
-			<option value ="scroll" selected>Scroll</option>
+	        <select id="animation" onchange="changeAnim(this.value)">
+			<optgroup selected="selected" label="Animation Type" value="fade">Fade</option>
 			<option value ="fade">Fade</option>
+			<option value ="scroll">Scroll</option>
 			<option value ="wipe" >Wipe</option>
+			</optgroup>
 			</select>
 		</div>
         
