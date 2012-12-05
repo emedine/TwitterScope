@@ -122,6 +122,9 @@
       
       boolean hasTweets = false;
       
+      // Dynamic list of Tweet objects
+      /// this holds our images
+      HashMap uniqueTweets;
       //// text object
       ArrayList<TextSpawn> TextObjectArray =  new ArrayList();
       // each objects size is stored in an array
@@ -138,19 +141,21 @@
       PFont fontOne;
       PFont fontTwo;
 
-	
+      PImage tweetPic;
       
       /// ANIMATION PRESETS
       // scroll
-      int vSpacing = 40;
+      int vSpacing = 200;
       int tweetTextSize = 24;
-	  string animationType = "scroll"; // "fade", "wipeleft", "wiperight", "random"
+	  string animationType = "fade"; // "fade", "wipeleft", "wiperight", "random"
 	  boolean fadeOutReady = false;
+	  int vertScrollHeight; // height of all the vertically scrolling tweets
       
     class Tweet {
       public String id;
       public String profileName;
       public String profileImageUrl;
+      public PImage profileImage; // needs to be loaded manually
       public String text;
       public Date time;
     }
@@ -165,9 +170,10 @@
       // XXX: jbuck: "just subtract 10"
 	  size(1024, 768);
         
-      colorMode(RGB, 100);
+      // hash map that holds our tweets and images
+      uniqueTweets = new HashMap();
         
-
+      colorMode(RGB, 100);
       /// size(window.innerWidth, window.innerHeight-10);
       background(bgColor);
       smooth();
@@ -178,7 +184,7 @@
       // Start a live feed loading, results will be available in a global
       // ArrayList called tweets.  loadTweets() is a custom method added
       // by processing-twitter.js 
-      loadTweets('ladygaga');
+      loadTweets('zombie');
 
       // You can also pass geolocation data to limit tweets to a geographic area
       // loadTweets('class', '43.7496,-79.4886,1km'); // York University
@@ -194,13 +200,30 @@
       void spawnText(){
           // If we haven't created the text objects, do it now
           if (tweets.size() > 0){
+        /// get the total height of all the tweets for scrolling positioning
+		  vertScrollHeight = tweets.size()*vSpacing;
           for (int i = 0; i < tweets.size(); i++) {
 			// reset vspacing
-			vSpacing = 40;
+			  vSpacing = 40;
               Tweet t = (Tweet) tweets.get(i);
+              
+              /// t.profileImage = requestImage(t.profileImageUrl);
+              /// get tweet data
               String msg = t.text;
               String usrName = t.profileName;
+			  String theDate = t.date;
+              String theImagePath = t.profileImageUrl;
               console.log("Name: " + t.profileName);
+              
+              // set profile image into tweet object
+              // Load a PImage of the profile pic
+              t.profileImage = requestImage(t.profileImageUrl);
+              // console.log("SAVING PIC URL: " + theImagePath);
+              // save tweet object to our hashmap list of unique tweets
+              uniqueTweets.put(t.id, t);
+              
+              console.log("PUT IMAGE: " + uniqueTweets.get(t.id) + " ");
+              
               
               //// ADD TEXT SPAWN
               theTextObject = new TextObject();
@@ -211,19 +234,23 @@
 
 			  int numChars = msg.length();
 			  // console.log("TWEET: " + msg + " numChars: " + numChars);
+		     /* this spaces things diferently depending on line breaks
 			  if (numChars > 30 && numChars <60 ){
 				vSpacing = vSpacing*2;
 			  }
 			  if(numChars>=60){
 				vSpacing = vSpacing*3;
 				}
-              theTextObject.initText(msg, usrName, TextSizes[i]);
+			 */
+
+              /// initialize our text object
+              theTextObject.initText(msg, usrName, theImagePath, theDate, TextSizes[i], t.id);
 			  /// space the objects with v spacing + the line height
-			  theTextObject.tId = i;
-              theTextObject.theY = i * vSpacing;
+			  // theTextObject.tId = i;
+              theTextObject.theY = i * 200;
               TextObjectArray.add(theTextObject);
           }
-          console.log("NUM TWEET OBJECTS: " + TextObjectArray.size() + " NUM TWEETS: " + tweets.size());
+         
           curNumTweets =  tweets.size();
           tweets.clear();
 		  hasTweets = true;
@@ -293,10 +320,10 @@
 		// animationType = tType;
         switch(animationType) {
   		case 'fade': 
-    		doTextObjectFade();
+    		setTextObjectFade();
     		break;
   		case 'scroll': 
-			doTextObjectScroll();
+			setTextObjectScroll();
     		break;
   		case 'wipe': 
     		println("wipe");  // Prints "Bravo"
@@ -309,8 +336,8 @@
           
       }
 	
-	///// ANIMATE TEXT OBJECT
-	public void doTextObjectFade(){
+	///// SET ALL TEXT OBJECT ANIMATION //////
+	public void setTextObjectFade(){
  		for (int i = 0; i < TextObjectArray.size(); i++){
             try{
                 
@@ -336,15 +363,13 @@
         }	
 	}
 
-	public void doTextObjectScroll(){
+	public void setTextObjectScroll(){
 		for (int i = 0; i < TextObjectArray.size(); i++){
             try{
-                // update size
-                int dSize = TextSizes[i];
                 // update text object position
                 TextObject dTextObj = TextObjectArray.get(i);
-                // dTextObj.doAnim(dSize, vSpacing * i);
-                dTextObj.doAnim(dSize);
+                // dTextObj.doScrollAnim(dSize, vSpacing * i);
+                dTextObj.doScrollAnim();
                 
             } catch (Exception e){
                 println("WTF?" + e);
@@ -352,6 +377,8 @@
         }
 
 	}
+
+	//// END SET ALL TEXT OBJECT ANIM /////
       
     ///// DEVICE FUNCTIONS
       // stop app when hit home
@@ -371,12 +398,21 @@
       class TextObject {
           String tweetText = "";
           String tweetName = "";
+		  String tweetTime = "";
+          String tweetPicPath = "";
+
           Boolean textDirection;
-          int tSize= 24;
-          int tSpacing = 20;
+
+          int tSize= 36;
+          int tSpacing = 40; // single line spacing
           int tId;
 		  int fadeLevel = 0;
           color fadeColor = (255,255,255,fadeLevel);
+
+		  // text box sizes
+		  int textBoxW = 979;
+		  int textBoxH = 200;
+
 
           //// TIMER
 		  Timer timer;
@@ -391,10 +427,12 @@
 		  boolean fadeOut = false;
 		  boolean hasFaded = false;
      
-          void initText(String theTweet, String theName, int theSize){
-              
+          void initText(String theTweet, String theName, String theImagePath, String theDate, int theSize, int theID){
+              tId = theID;
               tweetText = theTweet;
               tweetName = theName;
+			  tweetTime = theDate;
+              tweetPicPath = theImagePath;
               /// set the size
               int tSize= theSize;
               /// set the opacity
@@ -402,7 +440,7 @@
                
           }
 
-		  /// do fade animation
+		  /// DO FADE ANIMATION////////
 		  public void doFade(){
 			/// set position
 			 if(fadeIn){ //// fading in
@@ -455,45 +493,64 @@
 
 
 			}
-			  //// unhex the current font color
+			  //// draw the text box
 			  fadeColor = color(tFontColor,fadeLevel);
               fill(fadeColor);
  			  textAlign(CENTER);
 			  textFont(BasicFont,tSize);
-              // text(tweetText, theX, theY, 1024, 200);
-			  text(tweetText, 45, 375, 979, 200);
-              textSize(tSize);
+			  text(tweetText, 45, 375, textBoxW, textBoxH);
               textWidth(1024);
+              
+              //tweetPicPath
 
 
 		  }
           
-          /// do scrolling animation
+          /// DO SCROLLING ANIMATION ////
           
-          public void doAnim(int xsize){
+          public void doScrollAnim(){
               // check size, alignment, color
-              tSize = xsize;
+              // tSize = xsize;
               textAlign(CENTER);
 			  textFont(BasicFont,tSize);
               fill(tFontColor);
 			  // text(s, 10, 10, 70, 80);
 			  // text(tweetText, theX, theY);
-              text(tweetText, theX, theY, 1024, 200);
-              textSize(tSize);
-              textWidth(1024);
               
-			  // move
-              theY += tAnimSpeed;
-              if(theY >= tHeight){
-                  
-                  theY = -30;
+              /// only render if it's in the viewable area
+              if(theY > -30 && theY < 800){
+
+                  object t = uniqueTweets.get(tId); // get(tId);
+                  // console.log(" GETTING UNIQUE TWEET DATA: " + t.profileName);
+                  text(tweetText, theX, theY, textBoxW, textBoxH);
+                  text(tweetName + "   ..." + tweetTime, theX, theY + tSpacing *2, textBoxW, tSpacing);
+                  // console.log("HEIGHT: " + tweetName + " " + textBoxH);
+
+                  // Draw the profile image
+                  image(t.profileImage, theX, theY);
+
+                  // move 
               }
-              
-			  
+              theY += tAnimSpeed;
+              if(theY >= vertScrollHeight){
+                  
+                  theY = 0;
+              }
               
           }
           
       }
+	  private void doWordWrap(String theText){
+		// get the width to be filled ///////
+		// figure out how many chars per width
+		// count thru the chars till hit a the maxwidth
+		// save a line of text and put it in the array list
+		// keep going until all chars are reached
+
+		// merge array list as string with line breaks
+
+
+	  }
        // end text object ///////
       
    // TIMER CLASS ////////
@@ -627,16 +684,7 @@ class Timer {
                     Processing.getInstanceById('tweets').changeFontColor(hex);
 
                 };
-                /* 
-                c[2].callback = function(hex, hsv, rgb, mousePicker, mouseSlide) {
-                    ColorPicker.positionIndicators(
-                                                   slideIndicators[2], pickerIndicators[2],
-                                                   mouseSlide, mousePicker
-                                                   );
-                   theProcessing.changeFontColor(hex);
-                    console.log("CHANGING: " + hex);
-                };
-                 */
+                
                 </script>
 
             
