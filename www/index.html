@@ -137,7 +137,8 @@
 	   int curTextID; /// id for texxt objedt to be faded
 
  	/// fonts
-      PFont BasicFont = createFont("Arial", 24, true);;
+      PFont BasicFont = createFont("Arial", 24, true);
+      PFont ItalicFont = createFont("Arial Italic", 18, true);
       PFont SanSerif;
       PFont fontOne;
       PFont fontTwo;
@@ -201,6 +202,10 @@
       
       /// does the initial spawn
       void spawnText(){
+          /*
+          String[] fontList = PFont.list();
+          console.log(fontList);
+           */
           // If we haven't created the text objects, do it now
           if (tweets.size() > 0){
         /// get the total height of all the tweets for scrolling positioning
@@ -402,13 +407,13 @@
           Boolean textDirection;
 
           int tSize= 36;
-          int tSpacing = 40; // single line spacing
+          int tSpacing = 60; // single line spacing
           int tId;
 		  int fadeLevel = 0;
           color fadeColor = (255,255,255,fadeLevel);
 
 		  // text box sizes
-		  int textBoxW = tWidth - theMargin*2; /// width of the textbox - the margin on each side
+		  int textBoxW = tWidth - theMargin; /// width of the textbox - the margin on each side
 		  int textBoxH = 200;
           int numLines; 
 
@@ -506,8 +511,14 @@
 			  fadeColor = color(tFontColor,fadeLevel);
               fill(fadeColor);
  			  textAlign(CENTER);
+              /// "from" text
+              int thePadding = 60;
+              textFont(ItalicFont, tSize);
+              text(tweetName + "   ..." + tweetTime, 45, 300, textBoxW, textBoxH);
+              
+              /// tweet text
 			  textFont(BasicFont,tSize);
-			  text(tweetText, 45, 375, textBoxW, textBoxH);
+			  text(tweetText, 45, 300 + tSpacing, textBoxW, textBoxH);
               textWidth(1024);
               
               //tweetPicPath
@@ -521,7 +532,6 @@
               // check size, alignment, color
               // tSize = xsize;
               textAlign(LEFT); //// left align so we can line up the pic with the person's name
-			  textFont(BasicFont,tSize);
               fill(tFontColor);
 			  // text(s, 10, 10, 70, 80);
 			  // text(tweetText, theX, theY);
@@ -530,16 +540,26 @@
               if(theY > -200 && theY < 800){
 
                   object t = uniqueTweets.get(tId); // get(tId);
+                  /* tweet on top, person on bottom 
                   // set the main tweet text
-                  text(tweetText, theMargin, theY, textBoxW, textBoxH);
-                                   
+                  text(tweetText, theMargin, theY, textBoxW, textBoxH);               
                   text(tweetName + "   ..." + tweetTime, theMargin + 60, theY + tSpacing * (numLines+1), textBoxW, tSpacing);
                   // console.log("HEIGHT: " + tweetName + " " + textBoxH);
-
                   // Draw the profile image
                   image(t.profileImage, theMargin, theY + tSpacing *(numLines+1));
+                   */
+                  // Draw the profile image
+                  image(t.profileImage, theMargin, theY);
+                  // do the "from" name
+                  int thePadding = 60;
 
-                  // move 
+                  textFont(ItalicFont, tSize);
+                  text(tweetName + "   ..." + tweetTime, theMargin + thePadding, theY, textBoxW, tSpacing);
+                  // console.log("HEIGHT: " + tweetName + " " + textBoxH);
+                  // set the main tweet text
+                  textFont(BasicFont,tSize);
+                  text(tweetText, theMargin, theY + tSpacing, textBoxW, textBoxH);
+                // move 
               }
               theY += tAnimSpeed;
               if(theY >= vertScrollHeight){
