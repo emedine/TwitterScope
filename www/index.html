@@ -129,11 +129,12 @@
       ArrayList<TextSpawn> TextObjectArray =  new ArrayList();
       // each objects size is stored in an array
       // for some reason Processing wants to reset the text sizes
+      /// I think I can get rid of this
       int[] TextSizes;
       int[] TextPosY;
-	 float oldLineHeight;
-	 float newLineHeight;
-	 int curTextID; /// id for texxt objedt to be faded
+	   float oldLineHeight;
+	   float newLineHeight;
+	   int curTextID; /// id for texxt objedt to be faded
 
  	/// fonts
       PFont BasicFont = createFont("Arial", 24, true);;
@@ -141,15 +142,17 @@
       PFont fontOne;
       PFont fontTwo;
 
-      PImage tweetPic;
+      // PImage tweetPic;
       
       /// ANIMATION PRESETS
       // scroll
-      int vSpacing = 200;
+      int vSpacing = 200; /// this is the spacing between scrolling tweet objects
       int tweetTextSize = 24;
 	  string animationType = "fade"; // "fade", "wipeleft", "wiperight", "random"
 	  boolean fadeOutReady = false;
 	  int vertScrollHeight; // height of all the vertically scrolling tweets
+      int theMargin = 50; // margins from side to side
+      int charWidth = 10; // width of the text characters
       
     class Tweet {
       public String id;
@@ -206,8 +209,6 @@
 			// reset vspacing
 			  vSpacing = 40;
               Tweet t = (Tweet) tweets.get(i);
-              
-              /// t.profileImage = requestImage(t.profileImageUrl);
               /// get tweet data
               String msg = t.text;
               String usrName = t.profileName;
@@ -215,16 +216,13 @@
               String theImagePath = t.profileImageUrl;
               console.log("Name: " + t.profileName);
               
-              // set profile image into tweet object
-              // Load a PImage of the profile pic
+              // set profile image into tweet object by
+              // loading a PImage of the profile pic
+              // this may be the canvas taint workaround
               t.profileImage = requestImage(t.profileImageUrl);
-              // console.log("SAVING PIC URL: " + theImagePath);
               // save tweet object to our hashmap list of unique tweets
               uniqueTweets.put(t.id, t);
-              
-              console.log("PUT IMAGE: " + uniqueTweets.get(t.id) + " ");
-              
-              
+
               //// ADD TEXT SPAWN
               theTextObject = new TextObject();
               TextSizes[i] = tweetTextSize;
@@ -232,7 +230,7 @@
 			  // do all the spacing
 			  // this will have to be reset somewhere
 
-			  int numChars = msg.length();
+			  // int numChars = msg.length();
 			  // console.log("TWEET: " + msg + " numChars: " + numChars);
 		     /* this spaces things diferently depending on line breaks
 			  if (numChars > 30 && numChars <60 ){
@@ -246,8 +244,7 @@
               /// initialize our text object
               theTextObject.initText(msg, usrName, theImagePath, theDate, TextSizes[i], t.id);
 			  /// space the objects with v spacing + the line height
-			  // theTextObject.tId = i;
-              theTextObject.theY = i * 200;
+              theTextObject.theY = (i * 200) - 200; /// start spawning above 0 so there's no gap
               TextObjectArray.add(theTextObject);
           }
          
@@ -399,7 +396,8 @@
           String tweetText = "";
           String tweetName = "";
 		  String tweetTime = "";
-          String tweetPicPath = "";
+          // String tweetPicPath = "";
+          int numChars;
 
           Boolean textDirection;
 
@@ -410,15 +408,16 @@
           color fadeColor = (255,255,255,fadeLevel);
 
 		  // text box sizes
-		  int textBoxW = 979;
+		  int textBoxW = tWidth - theMargin*2; /// width of the textbox - the margin on each side
 		  int textBoxH = 200;
+          int numLines; 
 
 
           //// TIMER
 		  Timer timer;
 
           /// positioning
-          private int theX = 0;
+          // private int theX = 0;
           private int theY = 0;
           
 		  /// fade states
@@ -429,15 +428,25 @@
      
           void initText(String theTweet, String theName, String theImagePath, String theDate, int theSize, int theID){
               tId = theID;
-              tweetText = theTweet;
+              String rawTweet = theTweet;
+              tweetText = rawTweet.replace("\n", "");
+              tweetText = trim(tweetText); /// get rid of whitespace
               tweetName = theName;
 			  tweetTime = theDate;
-              tweetPicPath = theImagePath;
+              // tweetPicPath = theImagePath;
               /// set the size
               int tSize= theSize;
-              /// set the opacity
-              // console.log("TEXT OBJECT NAME: " + tweetName);
-               
+              //
+              numChars = theTweet.length();
+              // find out how many lines of text there are
+              // by dividing numchars*charwidth by textBoxW
+              int cWidth = 10; /// textWidth(theTweet.charAt(1));
+              numLines = Math.round((cWidth*numChars)/textBoxW);
+              console.log("NUM LINES: " + numLines + "Char Width: " + cWidth);
+
+              // numLines = Math.round((charWidth*numChars)/textBoxW);
+              // console.log("NUM LINES: " + numLines);
+              
           }
 
 		  /// DO FADE ANIMATION////////
@@ -511,30 +520,31 @@
           public void doScrollAnim(){
               // check size, alignment, color
               // tSize = xsize;
-              textAlign(CENTER);
+              textAlign(LEFT); //// left align so we can line up the pic with the person's name
 			  textFont(BasicFont,tSize);
               fill(tFontColor);
 			  // text(s, 10, 10, 70, 80);
 			  // text(tweetText, theX, theY);
               
               /// only render if it's in the viewable area
-              if(theY > -30 && theY < 800){
+              if(theY > -200 && theY < 800){
 
                   object t = uniqueTweets.get(tId); // get(tId);
-                  // console.log(" GETTING UNIQUE TWEET DATA: " + t.profileName);
-                  text(tweetText, theX, theY, textBoxW, textBoxH);
-                  text(tweetName + "   ..." + tweetTime, theX, theY + tSpacing *2, textBoxW, tSpacing);
+                  // set the main tweet text
+                  text(tweetText, theMargin, theY, textBoxW, textBoxH);
+                                   
+                  text(tweetName + "   ..." + tweetTime, theMargin + 60, theY + tSpacing * (numLines+1), textBoxW, tSpacing);
                   // console.log("HEIGHT: " + tweetName + " " + textBoxH);
 
                   // Draw the profile image
-                  image(t.profileImage, theX, theY);
+                  image(t.profileImage, theMargin, theY + tSpacing *(numLines+1));
 
                   // move 
               }
               theY += tAnimSpeed;
               if(theY >= vertScrollHeight){
                   
-                  theY = 0;
+                  theY =-200;
               }
               
           }
