@@ -98,12 +98,12 @@
     }
         
     function changeSearch(searchTerm){
-        // /*
-        console.log("CHANGE SEARCH: " + searchTerm);
+        /*
         processingInstance = Processing.getInstanceById('tweets');
     	processingInstance.initSearch(searchTerm);
-
-        // */
+    	console.log("Change search: " + searchTerm);
+         */
+            
             
     }
         
@@ -141,7 +141,7 @@
       
       boolean interfaceShowing = true;
       
-      String searchTerm;
+      string searchTerm;
       
       // Dynamic list of Tweet objects
       /// this holds our images
@@ -196,7 +196,8 @@
     }
     void setup() {
         
-      
+      searchTerm = "zombie";
+        
       // XXX: jbuck: "just subtract 10"
 	  size(1024, 768);
         
@@ -217,7 +218,7 @@
        TextPosY = new int[100];
        TextSizes[0] = tweetTextSize;
         
-        initSearch();
+        initSearch(searchTerm);
         
     }
       
@@ -745,7 +746,7 @@ class Timer {
         <div id="interface">
         <div id="header_label"><a href="#"><img src="images/header.png" width="253" height="33"></a></div>
         <div id="closeButton"><a href="#" onClick="hideOverlay(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a></div>
-        <div id="searchterm"><img src="images/butt_search_term.png" width="175" height="23"><input type="search" name="twittersearch" size="73" onsearch="changeSearch(this.value)" /></div>
+        <div id="searchterm"><img src="images/butt_search_term.png" width="175" height="23"><input type="search" name="twittersearch" size="73" onsearch="changeSearch(this.value)"/></div>
         <div id="speedslider"><img src="images/butt_speed.png" width="97" height="23"><input type="range" min="0" max="20" value="5" step="1" onchange="showValue(this.value)"/></div>
         <div id="animation_type"><img src="images/animation.png" width="151" height="23"> 
 	        <select id="animation" onchange="changeAnim(this.value)">
