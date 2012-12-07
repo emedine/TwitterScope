@@ -42,7 +42,7 @@ body {
     font-size: 12px; 
     margin: 0;
     padding: 0;
-    background: black;
+    background: #cccccc;
 }
 select, input, textarea, button { font:99% sans-serif; }
 pre, code, kbd, samp { font-family: monospace, sans-serif; }

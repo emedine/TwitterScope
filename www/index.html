@@ -56,16 +56,20 @@
     /// INTERFACE FUNCTIONS
     var theOverlay;
     // show and hide
+    // this is called from the canvas
     function showOverlay(theID){
         theOverlay = document.getElementById("interface");
         theOverlay.style.display = "block";
-        console.log("SHOW OVERLAY");
-            
+
     }
+    // this is called from the interface
     function hideOverlay(){
+        if (!processingInstance) {
+            processingInstance = Processing.getInstanceById('tweets');
+        }
         theOverlay = document.getElementById("interface");
         theOverlay.style.display = "none";
-        console.log("HIDE OVERLAY");
+        processingInstance.overlayOff();
     }
         
     /// Processing control functions ////
@@ -113,14 +117,17 @@
     // and automatically placed in the tweets ArrayList (created in JS)
       
     /// GLOBAL PROPERTIES
-      int tWidth = 1024;
-      int tHeight = 768;
+      int tWidth = 1024;  /// canvas width
+      int tHeight = 768;  /// canvas height
       color bgColor = #000000;
       color tFontColor = #FFFFFF;
 	  int tAnimSpeed = 2;
+      int fadeSpeed;
 	  int curNumTweets;
       
       boolean hasTweets = false;
+      
+      boolean interfaceShowing = true;
       
       // Dynamic list of Tweet objects
       /// this holds our images
@@ -147,7 +154,7 @@
       
       /// ANIMATION PRESETS
       // scroll
-      int vSpacing = 200; /// this is the spacing between scrolling tweet objects
+      int tBoxSpace = 400; /// this is the spacing between scrolling tweet objects
       int tweetTextSize = 24;
 	  string animationType = "fade"; // "fade", "wipeleft", "wiperight", "random"
 	  boolean fadeOutReady = false;
@@ -206,13 +213,12 @@
           String[] fontList = PFont.list();
           console.log(fontList);
            */
+          int prevBoxH = 0;
+          int totalBoxH = 0;
           // If we haven't created the text objects, do it now
           if (tweets.size() > 0){
-        /// get the total height of all the tweets for scrolling positioning
-		  vertScrollHeight = tweets.size()*vSpacing;
-          for (int i = 0; i < tweets.size(); i++) {
-			// reset vspacing
-			  vSpacing = 40;
+                for (int i = 0; i < tweets.size(); i++) {
+			
               Tweet t = (Tweet) tweets.get(i);
               /// get tweet data
               String msg = t.text;
@@ -231,31 +237,28 @@
               //// ADD TEXT SPAWN
               theTextObject = new TextObject();
               TextSizes[i] = tweetTextSize;
-              
-			  // do all the spacing
-			  // this will have to be reset somewhere
-
-			  // int numChars = msg.length();
-			  // console.log("TWEET: " + msg + " numChars: " + numChars);
-		     /* this spaces things diferently depending on line breaks
-			  if (numChars > 30 && numChars <60 ){
-				vSpacing = vSpacing*2;
-			  }
-			  if(numChars>=60){
-				vSpacing = vSpacing*3;
-				}
-			 */
 
               /// initialize our text object
               theTextObject.initText(msg, usrName, theImagePath, theDate, TextSizes[i], t.id);
-			  /// space the objects with v spacing + the line height
-              theTextObject.theY = (i * 200) - 200; /// start spawning above 0 so there's no gap
               TextObjectArray.add(theTextObject);
+              /// space the objects with v spacing + the line height
+
+              theTextObject.theY = ((i*tBoxSpace) + prevBoxH) - tBoxSpace;
+              console.log("PREV BOX HEIGHT = " + prevBoxH);
+              prevBoxH = theTextObject.textBoxH;
+              totalBoxH += prevBoxH;
+                    vertScrollHeight = (tweets.size()*tBoxSpace);//  + totalBoxH;
+
+              // theTextObject.theY = (i * 200)-200; /// start spawning above 0 so there's no gap
           }
-         
+          /// get the total height of all the tweets for scrolling positioning
+                   console.log("TOTAL BOX HEIGHT = " + vertScrollHeight + "JUST SPACING: "  + tweets.size()*tBoxSpace);
+
           curNumTweets =  tweets.size();
           tweets.clear();
 		  hasTweets = true;
+         
+
           }
           
       }
@@ -276,46 +279,65 @@
     
     // show or hide interface
       // Rebuild the word list when the user clicks
+      
       void mousePressed() {
           // background(0);
           // tweets.clear();
           // words.clear();
-          
-          
-          /// show overlay
-          window.showOverlay();
-          console.log("YOU CLICKED THE WINDOW");
+          overlayOn();
       }
+      void overlayOn(){
+          /// show overlay
+          window.showOverlay(); /// calls to the interface div in the htmls
+          interfaceShowing = true; /// 
+      }
+      void overlayOff(){
+
+          interfaceShowing = false;
+          
+      }
+      
       /// change colors
 
       void changeBGColor(String theColor){
-          string dColor = theColor.substring(1);
-          color hi = unhex("FF" + dColor);
-          bgColor = hi;
+          if(interfaceShowing){
+              string dColor = theColor.substring(1);
+              color hi = unhex("FF" + dColor);
+              bgColor = hi;
+          }
           
       }
 
       void changeFontColor(int theColor){
-          string dColor = theColor.substring(1);
-          color newColor = unhex("FF" + dColor);
-          tFontColor = newColor;
+          if(interfaceShowing){
+              string dColor = theColor.substring(1);
+              color newColor = unhex("FF" + dColor);
+              tFontColor = newColor;
+          }
          
       }
 	  // change speed
 	  void changeAnimSpeed(String newValue){
-		int dAnim = int(newValue);
-          tAnimSpeed = dAnim;
-			console.log("SLIDER: " + tAnimSpeed);
-		}
-      // array with all the different styles
-      // pick a style
-      // pass it to the text object
-      // let the text object position itself
-		
+          if(interfaceShowing){
+              int dAnim = int(newValue);
+              tAnimSpeed = dAnim;
+              /// reset everything and fade out with new speed
+              
+              //*
+              TextObject dTextObj = TextObjectArray.get(curTextID);
 
-	  void changeAnimationType(String animType){
+              // dTextObj.timer.stop();
+              dTextObj.fadeIn = false;
+              dTextObj.fadeHold = false;
+              dTextObj.fadeOut = true;
+            //*/
+          }
+		}
+     
+	  //// change animation type
+      void changeAnimationType(String animType){
 		animationType = animType;
-		console.log("SWITCH animationType CASE");
+		// console.log("SWITCH animationType CASE");
 	  }
 
       void doTextObjectAnim(){
@@ -333,9 +355,6 @@
  		 default:
     		break;
 		}
-		
-
-          
       }
 	
 	///// SET ALL TEXT OBJECT ANIMATION //////
@@ -370,7 +389,6 @@
             try{
                 // update text object position
                 TextObject dTextObj = TextObjectArray.get(i);
-                // dTextObj.doScrollAnim(dSize, vSpacing * i);
                 dTextObj.doScrollAnim();
                 
             } catch (Exception e){
@@ -395,6 +413,10 @@
         // on
         // off
       
+      // help window
+      
+      // info window
+      
     //// TEXT OBJECT /////////
       // /*
       class TextObject {
@@ -403,20 +425,23 @@
 		  String tweetTime = "";
           // String tweetPicPath = "";
           int numChars;
-
+          int totalCharWidth = 0;
+          
           Boolean textDirection;
 
-          int tSize= 36;
-          int tSpacing = 60; // single line spacing
-          int tId;
-		  int fadeLevel = 0;
-          color fadeColor = (255,255,255,fadeLevel);
+          int tSize= 36; // text size
+          // int tSpacing = 60; // single line spacing
+          int tId; // id of the tweet
+		  int fadeLevel = 255;
+          color fadeColor = (0,0,0,fadeLevel);
 
 		  // text box sizes
-		  int textBoxW = tWidth - theMargin; /// width of the textbox - the margin on each side
-		  int textBoxH = 200;
-          int numLines; 
-
+          int numLines;
+          int lineHeight = 60; // height of a single line
+          int thePadding = 60; // padding between image and name
+		  int textBoxW = tWidth - (theMargin*2); /// width of the textbox - the margin on each side
+		  int textBoxH;
+          
 
           //// TIMER
 		  Timer timer;
@@ -438,36 +463,65 @@
               tweetText = trim(tweetText); /// get rid of whitespace
               tweetName = theName;
 			  tweetTime = theDate;
-              // tweetPicPath = theImagePath;
               /// set the size
               int tSize= theSize;
               //
               numChars = theTweet.length();
+              
+              // calculate the total length by adding up
+              // the width of all the characters
+              for(int l=0; l<numChars; l++){
+                  int charw = textWidth(theTweet.charAt(l));
+                  totalCharWidth += charw;
+                  
+              }
               // find out how many lines of text there are
               // by dividing numchars*charwidth by textBoxW
-              int cWidth = 10; /// textWidth(theTweet.charAt(1));
-              numLines = Math.round((cWidth*numChars)/textBoxW);
-              console.log("NUM LINES: " + numLines + "Char Width: " + cWidth);
-
+              // numLines = round((totalCharWidth)/textBoxW);
+              
+              // do it by hand?
+              if(totalCharWidth < 300){
+                  
+                  numLines = 0;
+              }
+              if(totalCharWidth >= 300 && totalCharWidth < (600)){
+                  
+                  numLines = 1;
+              }
+              
+              if(totalCharWidth >= (600)){
+                  numLines = 2;
+                  
+              }
+              
+              textBoxH = 60+((numLines)*60);
+             
               // numLines = Math.round((charWidth*numChars)/textBoxW);
               // console.log("NUM LINES: " + numLines);
+              console.log("String: " + theTweet);
+              console.log("lines: " + numLines + " char width: " + totalCharWidth);
+              
               
           }
 
 		  /// DO FADE ANIMATION////////
 		  public void doFade(){
 			/// set position
+              // update fade speed
+              // map(value, start1, stop1, start2, stop2)
+              fadeSpeed = map(tAnimSpeed, 0, 20, 20000, 500);
+              
 			 if(fadeIn){ //// fading in
-				fadeLevel +=10;
-				if(fadeLevel > 255){
+				fadeLevel -=tAnimSpeed;
+				if(fadeLevel < 0){
 					hasFaded = true;
 					fadeIn = false;
 					fadeHold = true;
 					fadeOut = false;
 					/// start hold timer
-					timer = new Timer(5000);
+					timer = new Timer(fadeSpeed);
 					timer.start();
-					console.log("DONE FADE IN, HOLDING" + fadeHold + " " + tId + " "  + fadeOut);
+					// console.log("DONE FADE IN, HOLDING" + fadeHold + " " + tId + " "  + fadeOut);
 				}
 				
 
@@ -479,26 +533,33 @@
 						fadeIn = false;
 						fadeHold = false;
 						fadeOut = true;
-						console.log("DONE HOLDING, FADING OUT");
+						// console.log("DONE HOLDING, FADING OUT");
 					}
 
 
 			}
 			if (fadeOut){ //// fade out
-				fadeLevel -=10;
-				if(fadeLevel <=0){
-					console.log("DONE FADING OUT");
+				fadeLevel +=tAnimSpeed;
+				if(fadeLevel >=255){
+					// console.log("DONE FADING OUT");
 					fadeIn = true;
 					fadeHold = false;
 					fadeOut = false;
 
 					/// check to see if we've faded all of them
 					/// then reset the fade id
-					if(curTextID < curNumTweets){
+                    /*
+					if(curTextID <= curNumTweets){
 						curTextID +=1;
 						hasFaded = false;
-					} else if(curTextID >= curNumTweets){
-						console.log("FADED ALL LOOPS< RESETTING");
+                        console.log("Cur Tweet: " + curTextID + " total: " + curNumTweets);
+					}
+                     */
+                    hasFaded = false;
+                    curTextID +=1;
+                    console.log("Cur Tweet: " + curTextID + " total: " + curNumTweets);
+                    if(curTextID > curNumTweets){
+						console.log("FADED ALL LOOPS< RESETTING: "  + curTextID + " total: " + curNumTweets);
 						curTextID = 0;
 						hasFaded = false;
 					}
@@ -507,19 +568,35 @@
 
 
 			}
+              
+              // do the "from" name
+              thePadding = 60;
+              
 			  //// draw the text box
-			  fadeColor = color(tFontColor,fadeLevel);
-              fill(fadeColor);
+              fill(tFontColor);
  			  textAlign(CENTER);
               /// "from" text
-              int thePadding = 60;
               textFont(ItalicFont, tSize);
-              text(tweetName + "   ..." + tweetTime, 45, 300, textBoxW, textBoxH);
+              String headerText = tweetName + "   ..." + tweetTime;
+              text(tweetName + "   ..." + tweetTime, 45 + thePadding, 300, textBoxW, textBoxH);
+              
+              /// draw the image
+              String picPosX = textWidth(headerText)/2;
+              object t = uniqueTweets.get(tId); // get(tId);
+              image(t.profileImage, picPosX, 300);
+
               
               /// tweet text
 			  textFont(BasicFont,tSize);
-			  text(tweetText, 45, 300 + tSpacing, textBoxW, textBoxH);
+			  text(tweetText, 45, 300 + lineHeight, textBoxW, textBoxH);
               textWidth(1024);
+              
+              /// cover it up to fake a fade
+              fadeColor = color(bgColor,fadeLevel);
+              fill(fadeColor);
+              rect(0,0,tWidth, tHeight);
+              
+
               
               //tweetPicPath
 
@@ -537,34 +614,41 @@
 			  // text(tweetText, theX, theY);
               
               /// only render if it's in the viewable area
-              if(theY > -200 && theY < 800){
+              if(theY > -tBoxSpace && theY < 800){
 
                   object t = uniqueTweets.get(tId); // get(tId);
                   /* tweet on top, person on bottom 
                   // set the main tweet text
                   text(tweetText, theMargin, theY, textBoxW, textBoxH);               
-                  text(tweetName + "   ..." + tweetTime, theMargin + 60, theY + tSpacing * (numLines+1), textBoxW, tSpacing);
+                  text(tweetName + "   ..." + tweetTime, theMargin + 60, theY + lineHeight * (numLines+1), textBoxW, lineHeight);
                   // console.log("HEIGHT: " + tweetName + " " + textBoxH);
                   // Draw the profile image
-                  image(t.profileImage, theMargin, theY + tSpacing *(numLines+1));
+                  image(t.profileImage, theMargin, theY + lineHeight *(numLines+1));
                    */
                   // Draw the profile image
                   image(t.profileImage, theMargin, theY);
                   // do the "from" name
-                  int thePadding = 60;
-
+                  thePadding = 60;
+                  
+                  /// check height?
+                  int textHeightInPixels = textAscent() + textDescent();
+                  // console.log("TOTAL HEIGHT MAYBE: " + textHeightInPixels);
+                  
                   textFont(ItalicFont, tSize);
-                  text(tweetName + "   ..." + tweetTime, theMargin + thePadding, theY, textBoxW, tSpacing);
+                  text(tweetName + "   ..." + tweetTime, theMargin + thePadding, theY, textBoxW, lineHeight);
                   // console.log("HEIGHT: " + tweetName + " " + textBoxH);
                   // set the main tweet text
                   textFont(BasicFont,tSize);
-                  text(tweetText, theMargin, theY + tSpacing, textBoxW, textBoxH);
-                // move 
+                  text(tweetText, theMargin, theY + lineHeight, textBoxW, textBoxH);
+                // move
+                  //// show text box
+                  fill(60,60,60,60);
+                  rect(theMargin, theY, textBoxW, textBoxH);
               }
               theY += tAnimSpeed;
-              if(theY >= vertScrollHeight){
+              if(theY >= vertScrollHeight - tBoxSpace){
                   
-                  theY =-200;
+                  theY = 0 -(tBoxSpace);
               }
               
           }
