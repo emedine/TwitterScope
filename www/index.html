@@ -72,7 +72,7 @@
         processingInstance.overlayOff();
     }
         
-    /// Processing control functions ////
+    /// PROCESSING CONTROL FUNCTIONS ////
     var processingInstance;
     function testCom() {
       if (!processingInstance) {
@@ -89,13 +89,23 @@
     	processingInstance.changeAnimSpeed(newValue);
     	
     }
-    
+    /// animation change drop down
     function changeAnim(animType){
     	processingInstance = Processing.getInstanceById('tweets');
     	processingInstance.changeAnimationType(animType);
     	console.log("ACTIVATING ANIM CHANGE" + animType);
     	
     }
+        
+    function changeSearch(searchTerm){
+        processingInstance = Processing.getInstanceById('tweets');
+    	processingInstance.initSearch(searchTerm);
+    	console.log("ACTIVATING SEARCH CHANGE" + searchTerm);
+            
+            
+    }
+        
+        /// end PROCESSING CONTROL
     
     </script>
          </head>
@@ -129,21 +139,26 @@
       
       boolean interfaceShowing = true;
       
+      string searchTerm;
+      
       // Dynamic list of Tweet objects
       /// this holds our images
       HashMap uniqueTweets;
       //// text object
       ArrayList<TextSpawn> TextObjectArray =  new ArrayList();
       // each objects size is stored in an array
+      
+      
       // for some reason Processing wants to reset the text sizes
       /// I think I can get rid of this
       int[] TextSizes;
       int[] TextPosY;
-	   float oldLineHeight;
-	   float newLineHeight;
-	   int curTextID; /// id for texxt objedt to be faded
+      float oldLineHeight;
+      float newLineHeight;
+      
+	   int curTextID; /// id for texxt object to be faded
 
- 	/// fonts
+ 	/// FONTS
       PFont BasicFont = createFont("Arial", 24, true);
       PFont ItalicFont = createFont("Arial Italic", 18, true);
       PFont SanSerif;
@@ -178,6 +193,9 @@
           
     }
     void setup() {
+        
+      searchTerm = "zombie";
+        
       // XXX: jbuck: "just subtract 10"
 	  size(1024, 768);
         
@@ -192,20 +210,38 @@
       // Slow things down a bit...
       frameRate(30);
 
-      // Start a live feed loading, results will be available in a global
-      // ArrayList called tweets.  loadTweets() is a custom method added
-      // by processing-twitter.js 
-      loadTweets('zombie');
-
-      // You can also pass geolocation data to limit tweets to a geographic area
-      // loadTweets('class', '43.7496,-79.4886,1km'); // York University
-        spawnText();
         // set text sizes, pre-populate the array
-        TextSizes = new int[100];
-        TextPosY = new int[100];
-		TextSizes[0] = tweetTextSize;
+       /// I don't think we need this anymore
+       TextSizes = new int[100];
+       TextPosY = new int[100];
+       TextSizes[0] = tweetTextSize;
+        
+        initSearch(searchTerm);
         
     }
+      
+      void initSearch(string tSearch){
+          // zero out everything
+          try{
+              curNumTweets =  0;
+              tweets.clear();
+              hasTweets = false;
+          } catch (e:Error){
+              
+              console.log("Can't reset tweets: " + e);
+          }
+          
+          // Start a live feed loading, results will be available in a global
+          // ArrayList called tweets.  loadTweets() is a custom method added
+          // by processing-twitter.js
+          loadTweets('zombie');
+          
+          // You can also pass geolocation data to limit tweets to a geographic area
+          // loadTweets('class', '43.7496,-79.4886,1km'); // York University
+          spawnText();
+
+          
+      }
       
       /// does the initial spawn
       void spawnText(){
@@ -548,16 +584,10 @@
 
 					/// check to see if we've faded all of them
 					/// then reset the fade id
-                    /*
-					if(curTextID <= curNumTweets){
-						curTextID +=1;
-						hasFaded = false;
-                        console.log("Cur Tweet: " + curTextID + " total: " + curNumTweets);
-					}
-                     */
+
                     hasFaded = false;
                     curTextID +=1;
-                    console.log("Cur Tweet: " + curTextID + " total: " + curNumTweets);
+                    // console.log("Cur Tweet: " + curTextID + " total: " + curNumTweets);
                     if(curTextID > curNumTweets){
 						console.log("FADED ALL LOOPS< RESETTING: "  + curTextID + " total: " + curNumTweets);
 						curTextID = 0;
@@ -680,7 +710,7 @@ class Timer {
   // Starting the timer
   void start() {
     // When the timer starts it stores the current time in milliseconds.
-	console.log("STARTING TIMER");
+	// console.log("STARTING TIMER");
     savedTime = millis(); 
   }
   
@@ -708,7 +738,7 @@ class Timer {
         <div id="interface">
         <div id="header_label"><a href="#"><img src="images/header.png" width="253" height="33"></a></div>
         <div id="closeButton"><a href="#" onClick="hideOverlay(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a></div>
-        <div id="searchterm"><img src="images/butt_search_term.png" width="175" height="23"><input type="search" name="twittersearch" size="73" /></div>
+        <div id="searchterm"><img src="images/butt_search_term.png" width="175" height="23"><input type="search" name="twittersearch" size="73" onsearch="changeSearch(this.value)"/></div>
         <div id="speedslider"><img src="images/butt_speed.png" width="97" height="23"><input type="range" min="0" max="20" value="5" step="1" onchange="showValue(this.value)"/></div>
         <div id="animation_type"><img src="images/animation.png" width="151" height="23"> 
 	        <select id="animation" onchange="changeAnim(this.value)">
