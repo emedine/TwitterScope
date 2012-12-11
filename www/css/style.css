@@ -174,15 +174,24 @@ a { text-decoration: none; }
 	float:left;
 	position:absolute;
 }
+
 #animation_type{
 	top:185px;
-	margin-left:380px;
+	margin-left:360px;
 	margin-right:0px;
 	margin-top:0px;
 	margin-bottom:0px;
 	float:right;
 	position:absolute;
 	
+}
+#showPic{
+	top:185px;
+	margin-left:630px;
+	margin-top:0px;
+	margin-bottom:0px;
+	float:left;
+	position:absolute;
 }
 #colorpicker_container{
 	margin-top:180px;
