@@ -186,12 +186,24 @@ a { text-decoration: none; }
 	
 }
 #showPic{
+    display: table-cell;
 	top:185px;
 	margin-left:630px;
-	margin-top:0px;
-	margin-bottom:0px;
 	float:left;
 	position:absolute;
+    vertical-align:middle;
+
+}
+#checkboxStyle{
+    display: table-cell;
+	top:3px;
+    left:120px;
+	float:left;
+	position:absolute;
+    vertical-align:middle;
+
+    
+    
 }
 #colorpicker_container{
 	margin-top:180px;
@@ -206,6 +218,13 @@ ul#colorpicker_container li{
    margin-right:30px;
 }
 
+#config_container{
+    margin-top:35px;
+	float:left;
+
+    
+}
+
 #footer {
 	clear: both;
 }
@@ -214,14 +233,43 @@ ul#colorpicker_container li{
 input [type='range'] {
     -webkit-appearance: none !important;
     background:white;
-    height:7px;}
+    height:7px;
+}
 input [type='range']::-webkit-slider-thumb {
     -webkit-appearance: none !important;
     background:white;
     height:10px;
     width:10px;
 }
-
+input [type='checkbox']{
+    height:20px;
+    width:20px;
+    
+    
+}
+/* help window styles */
+#help_panel{
+    width:872px;
+	margin: 0 auto;
+	min-height:586px;
+    position:absolute;
+    top:91px;
+    left:72px;
+    background: url('../images/help_bground.png') no-repeat;
+    
+}
+#help_label{
+	margin-top:20px;
+	margin-left:45px;
+	float:left;
+	
+}
+#help_closeButton{
+	margin-top:20px;
+	float:right;
+	margin-right:45px;
+	
+}
 
 /* nav positioning */
 

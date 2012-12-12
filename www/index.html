@@ -55,6 +55,8 @@
 	}
     /// INTERFACE FUNCTIONS
     var theOverlay;
+    var theSearchTerm;
+    var processingInstance;
     // show and hide
     // this is called from the canvas
     function showOverlay(theID){
@@ -73,7 +75,6 @@
     }
         
     /// PROCESSING CONTROL FUNCTIONS ////
-    var processingInstance;
     function testCom() {
       if (!processingInstance) {
           processingInstance = Processing.getInstanceById('tweets');
@@ -98,10 +99,16 @@
     }
         
     function changeSearch(searchTerm){
-        console.log("CHANGE SEARCH: " + searchTerm);
-        processingInstance = Processing.getInstanceById('tweets');
-    	processingInstance.initSearch(searchTerm);
+        theSearchTerm = searchTerm;
+        console.log("CHANGE SEARCH: " + theSearchTerm);
       
+    }
+    function goSearch(){
+        console.log("GO SEARCH: " + theSearchTerm);
+        processingInstance = Processing.getInstanceById('tweets');
+        processingInstance.initSearch(theSearchTerm);
+            
+            
     }
     function togglePic(toggleValue){
         console.log("TOGGLE PIC:  " + toggleValue);
@@ -110,10 +117,34 @@
 
     }
         
-        /// end PROCESSING CONTROL
+    function saveConfig(){
+            
+            
+    }
     
+    /// SHOW AND HIDE THE HELP /////////////
+    function showHelp(){
+        theHelp = document.getElementById("help_panel");
+        theHelp.style.display = "block";
+   
+            
+    }
+    function hideHelp(){
+        theHelp = document.getElementById("help_panel");
+        theHelp.style.display = "none";
+        
+    
+    }
+        
+    /// end PROCESSING CONTROL
+        
+    ////// CAMERA and PICTURE UPLOAD FUNCTIONS /////////////
+
     </script>
-         </head>
+    </head>
+    
+  <!-- ////////////// START THE BODY OF THE DOCUMENT ///////////////////// !-->
+    
   <body onLoad="onBodyLoad()">
   <!--
   A port of http://blog.blprnt.com/blog/blprnt/updated-quick-tutorial-processing-twitter by Jer Thorp's
@@ -738,7 +769,7 @@ class Timer {
     savedTime = millis(); 
   }
   
-  // The function isFinished() returns true if 5,000 ms have passed. 
+  // The function isFinished() returns true if the set number of ms have passed. 
   // The work of the timer is farmed out to this method.
   boolean isFinished() { 
     // Check how much time has passed
@@ -762,7 +793,7 @@ class Timer {
         <div id="interface">
         <div id="header_label"><a href="#"><img src="images/header.png" width="253" height="33"></a></div>
         <div id="closeButton"><a href="#" onClick="hideOverlay(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a></div>
-        <div id="searchterm"><img src="images/butt_search_term.png" width="175" height="23"><input type="search" name="twittersearch" size="73" onsearch="changeSearch(this.value)" /></div>
+        <div id="searchterm"><img src="images/butt_search_term.png" width="175" height="23"><input type="search" name="twittersearch" size="73" onsearch="changeSearch(this.value)" /><input type="button" id="goButton" onclick="goSearch()" value="go!"></input></div>
         <div id="speedslider"><img src="images/butt_speed.png" width="97" height="23"><input type="range" min="0" max="20" value="5" step="1" onchange="showValue(this.value)"/></div>
         <div id="animation_type"><img src="images/animation.png" width="151" height="23"> 
 	        <select id="animation" onchange="changeAnim(this.value)">
@@ -773,7 +804,8 @@ class Timer {
 			</optgroup>
 			</select>
 		</div>
-        <div id="showPic"><img src="images/butt_showpic.png" width="121" height="23"><input type="checkbox" onchange="togglePic(this.value)"/></div>
+            
+        <div id="showPic"><img src="images/butt_showpic.png" width="121" height="23"><div id="checkboxStyle"><input type="checkbox" onchange="togglePic(this.value)"/></div></div>
         
         <!-- 
        
@@ -799,7 +831,7 @@ class Timer {
 	            <li>
 	             <img src="images/butt_fontocolor.png" width="121" height="23">
 	            <br>
-	            <div class="cp-default"  style="margin-top:10px;"">
+	            <div class="cp-default"  style="margin-top:10px;">
 	                <div class="picker-wrapper">
 	                    <div class="picker"></div>
 	                    <div class="picker-indicator"></div>
@@ -810,6 +842,22 @@ class Timer {
 	                </div>
 	            </div>
 	            </li>
+                <li>
+                   <div id="config_container">
+                   <img src="images/butt_upload.png" width="128" height="47"><br>
+                   <img src="images/butt_delete.png" width="128" height="47"><br><br><br><br>
+                   <a href="#" onClick="showHelp(); return false;"><img src="images/butt_help.png" width="128" height="47"></a><br>
+                   <img src="images/butt_save.png" width="128" height="47"><br>
+                   </div>
+                    <!--
+                    <ul id="config_container">
+                        <li><img src="images/butt_upload.png" width="128" height="47"></li>
+                        <li><img src="images/butt_delete.png" width="128" height="47"></li>
+                        <li><img src="images/butt_help.png" width="128" height="47"></li>
+                        <li><img src="images/butt_save.png" width="128" height="47"></li>
+                    </ul>
+                     !-->
+                </li>
 	        </ul>
             </div>
             <!-- COLOR PICKER CODE !-->
@@ -854,8 +902,11 @@ class Timer {
                 };
                 
                 </script>
-
-            
-           
+        </div>
+       <!-- HELP SECTION !-->     
+      <div id="help_panel" style="display:none;">
+            <div id="help_label"><a href="#"><img src="images/header_help.png" width="108" height="33"></a></div>
+            <div id="help_closeButton"><a href="#" onClick="hideHelp(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a></div>
+        
         </div>
 </html>
