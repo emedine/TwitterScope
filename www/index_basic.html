@@ -98,13 +98,16 @@
     }
         
     function changeSearch(searchTerm){
-        /*
+        console.log("CHANGE SEARCH: " + searchTerm);
         processingInstance = Processing.getInstanceById('tweets');
     	processingInstance.initSearch(searchTerm);
-    	console.log("Change search: " + searchTerm);
-         */
-            
-            
+      
+    }
+    function togglePic(toggleValue){
+        console.log("TOGGLE PIC:  " + toggleValue);
+        processingInstance = Processing.getInstanceById('tweets');
+    	processingInstance.togglePic(toggleValue);
+
     }
         
         /// end PROCESSING CONTROL
@@ -120,26 +123,28 @@
   -->
   <script id='sketch' type="application/processing">
      
-    ArrayList<String> words = new ArrayList();
+      ArrayList<String> words = new ArrayList();
 
-    // Global ArrayList of tweets is created in processing-twitter.js
-    // ArrayList<Tweet> tweets = new ArrayList();
+      // Global ArrayList of tweets is created in processing-twitter.js
+      // ArrayList<Tweet> tweets = new ArrayList();
 
-    // A class representing a Tweet.  Tweet objects are created in JS
-    // and automatically placed in the tweets ArrayList (created in JS)
+      // A class representing a Tweet.  Tweet objects are created in JS
+      // and automatically placed in the tweets ArrayList (created in JS)
       
-    /// GLOBAL PROPERTIES
+      /// GLOBAL PROPERTIES
       int tWidth = 1024;  /// canvas width
       int tHeight = 768;  /// canvas height
       color bgColor = #000000;
       color tFontColor = #FFFFFF;
 	  int tAnimSpeed = 2;
       int fadeSpeed;
-	  int curNumTweets;
+	  int totalNumTweets;
       
       boolean hasTweets = false;
       
       boolean interfaceShowing = true;
+      
+      boolean showPic = true;
       
       string searchTerm;
       
@@ -147,7 +152,7 @@
       /// this holds our images
       HashMap uniqueTweets;
       //// text object
-      ArrayList<TextSpawn> TextObjectArray =  new ArrayList();
+      ArrayList<TextSpawn> TextObjectArray;// =  new ArrayList();
       // each objects size is stored in an array
       
       
@@ -188,16 +193,9 @@
       public Date time;
     }
 
-    void startTweets(){
-        console.log("TWITTER IS READY: PING");
-        // loadTweets('@ladygaga');
-
-          
-    }
     void setup() {
         
-      searchTerm = "zombie";
-        
+      searchTerm = "#coachella";
       // XXX: jbuck: "just subtract 10"
 	  size(1024, 768);
         
@@ -212,22 +210,28 @@
       // Slow things down a bit...
       frameRate(30);
 
-        // set text sizes, pre-populate the array
-       /// I don't think we need this anymore
-       TextSizes = new int[100];
-       TextPosY = new int[100];
-       TextSizes[0] = tweetTextSize;
-        
-        initSearch(searchTerm);
+               
+       initSearch(searchTerm);
         
     }
       
-      void initSearch(){
+      void initSearch(string tSearch){
           // zero out everything
+          searchTerm = tSearch;
           try{
-              curNumTweets =  0;
-              tweets.clear();
-              hasTweets = false;
+              // tweets.clear();
+              curTextID = 0;
+              // hash map that holds our tweet objects and images
+              uniqueTweets = new HashMap();
+              // text object array that holds all the text objects
+              
+              TextObjectArray =  new ArrayList();
+              // set text sizes, pre-populate the array
+              /// I don't think we need this anymore
+              TextSizes = new int[100];
+              TextPosY = new int[100];
+              TextSizes[0] = tweetTextSize;
+
           } catch (e:Error){
               
               console.log("Can't reset tweets: " + e);
@@ -236,7 +240,7 @@
           // Start a live feed loading, results will be available in a global
           // ArrayList called tweets.  loadTweets() is a custom method added
           // by processing-twitter.js
-          loadTweets('zombie');
+          loadTweets(searchTerm);
           
           // You can also pass geolocation data to limit tweets to a geographic area
           // loadTweets('class', '43.7496,-79.4886,1km'); // York University
@@ -247,15 +251,18 @@
       
       /// does the initial spawn
       void spawnText(){
+          
           /*
           String[] fontList = PFont.list();
           console.log(fontList);
            */
           int prevBoxH = 0;
           int totalBoxH = 0;
+          
           // If we haven't created the text objects, do it now
           if (tweets.size() > 0){
-                for (int i = 0; i < tweets.size(); i++) {
+              console.log("spawn text objects: " + tweets.size());
+              for (int i = 0; i < tweets.size(); i++) {
 			
               Tweet t = (Tweet) tweets.get(i);
               /// get tweet data
@@ -285,15 +292,15 @@
               console.log("PREV BOX HEIGHT = " + prevBoxH);
               prevBoxH = theTextObject.textBoxH;
               totalBoxH += prevBoxH;
-                    vertScrollHeight = (tweets.size()*tBoxSpace);//  + totalBoxH;
+              vertScrollHeight = (tweets.size()*tBoxSpace);//  + totalBoxH;
 
               // theTextObject.theY = (i * 200)-200; /// start spawning above 0 so there's no gap
           }
           /// get the total height of all the tweets for scrolling positioning
-                   console.log("TOTAL BOX HEIGHT = " + vertScrollHeight + "JUST SPACING: "  + tweets.size()*tBoxSpace);
+          console.log("TOTAL TWEETS: " + tweets.size() + "TOTAL BOX HEIGHT = " + vertScrollHeight + " JUST SPACING: "  + tweets.size()*tBoxSpace);
 
-          curNumTweets =  tweets.size();
-          tweets.clear();
+          totalNumTweets =  tweets.size();
+          tweets.clear(); /// why do we want to clear the tweets after this?
 		  hasTweets = true;
          
 
@@ -371,17 +378,31 @@
             //*/
           }
 		}
+      
+      void togglePic(){
+          
+          if(showPic){
+              
+              
+              showPic = false;
+          } else if(!showPic){
+              showPic = true;
+              
+          }
+      }
      
 	  //// change animation type
       void changeAnimationType(String animType){
 		animationType = animType;
+          reSetTextObjectFade();
 		// console.log("SWITCH animationType CASE");
 	  }
 
       void doTextObjectAnim(){
 		// animationType = tType;
         switch(animationType) {
-  		case 'fade': 
+  		case 'fade':
+            // reSetTextObjectFade();
     		setTextObjectFade();
     		break;
   		case 'scroll': 
@@ -400,7 +421,9 @@
  		for (int i = 0; i < TextObjectArray.size(); i++){
             try{
                 
-                // update text object position
+                // update text object
+                // if it hasn't faded in and out,
+                // init fade in toggle
                 TextObject dTextObj = TextObjectArray.get(i);
                 if(i == curTextID){
 					// console.log("FADING: " + curTextID);
@@ -410,17 +433,37 @@
 						dTextObj.fadeIn = true;
 					}
                 	dTextObj.doFade();
-				} else {
-                	dTextObj.fadeIn = false; /// make all other text objects invisible
-					dTextObj.fadeHold = false;
-					dTextObj.fadeOut = false;
-				}
+				} 
                 
-            } catch (Exception e){
-                println("WTF?" + e);
+            } catch (Exception:e){
+                println("Can't find object for fade: " + e);
             }
         }	
 	}
+      
+      /// RESET TEXT OBJECT FADE
+      public void reSetTextObjectFade(){
+          curTextID = 0;
+          console.log("RESET FADE: " + TextObjectArray.size());
+          for (int i = 0; i < TextObjectArray.size(); i++){
+              
+              try{
+                  
+                  // update text object
+                  // if it hasn't faded in and out,
+                  // init fade in toggle
+                  TextObject dTextObj = TextObjectArray.get(i);
+                  dTextObj.hasFaded = true;
+                  dTextObj.fadeIn = false;
+                  dTextObj.fadeHold = false;
+                  dTextObj.fadeOut = false;
+                  
+              } catch (Exception:e){
+                  println("Can't find object to reset fade: " + e);
+              }
+          }	
+      }
+
 
 	public void setTextObjectScroll(){
 		for (int i = 0; i < TextObjectArray.size(); i++){
@@ -429,8 +472,8 @@
                 TextObject dTextObj = TextObjectArray.get(i);
                 dTextObj.doScrollAnim();
                 
-            } catch (Exception e){
-                println("WTF?" + e);
+            } catch (Exception:e){
+                println("can't find object for scroll" + e);
             }
         }
 
@@ -464,8 +507,6 @@
           // String tweetPicPath = "";
           int numChars;
           int totalCharWidth = 0;
-          
-          Boolean textDirection;
 
           int tSize= 36; // text size
           // int tSpacing = 60; // single line spacing
@@ -476,10 +517,10 @@
 		  // text box sizes
           int numLines;
           int lineHeight = 60; // height of a single line
-          int thePadding = 60; // padding between image and name
-		  int textBoxW = tWidth - (theMargin*2); /// width of the textbox - the margin on each side
-		  int textBoxH;
-          
+          int textBoxW = tWidth - (theMargin*2); /// width of the textbox - the margin on each side
+		  int textBoxH; // height of the textbox
+          int picWidth = 60; // width of twitter pic
+          int picAdjY = 11;
 
           //// TIMER
 		  Timer timer;
@@ -489,7 +530,7 @@
           private int theY = 0;
           
 		  /// fade states
-		  boolean fadeIn = false;
+		  boolean fadeIn = false; /// toggle for initial fade in
 		  boolean fadeHold = false;      
 		  boolean fadeOut = false;
 		  boolean hasFaded = false;
@@ -586,42 +627,46 @@
 
 					/// check to see if we've faded all of them
 					/// then reset the fade id
-                    /*
-					if(curTextID <= curNumTweets){
-						curTextID +=1;
-						hasFaded = false;
-                        console.log("Cur Tweet: " + curTextID + " total: " + curNumTweets);
-					}
-                     */
-                    hasFaded = false;
+                    
                     curTextID +=1;
-                    console.log("Cur Tweet: " + curTextID + " total: " + curNumTweets);
-                    if(curTextID > curNumTweets){
-						console.log("FADED ALL LOOPS< RESETTING: "  + curTextID + " total: " + curNumTweets);
+                    console.log("Cur Tweet: " + curTextID + " total: " + totalNumTweets);
+                    if(curTextID >= totalNumTweets){
+						console.log("FADED ALL LOOPS< RESETTING: "  + curTextID + " total: " + totalNumTweets);
 						curTextID = 0;
-						hasFaded = false;
+						
 					}
-					
+					hasFaded = true;
 				}
 
 
 			}
               
               // do the "from" name
-              thePadding = 60;
-              
 			  //// draw the text box
               fill(tFontColor);
  			  textAlign(CENTER);
               /// "from" text
+              string headerText = tweetName + "   ..." + tweetTime;
               textFont(ItalicFont, tSize);
-              String headerText = tweetName + "   ..." + tweetTime;
-              text(tweetName + "   ..." + tweetTime, 45 + thePadding, 300, textBoxW, textBoxH);
-              
+              text(tweetName + "   ..." + tweetTime, theMargin + picWidth, 300, textBoxW, textBoxH);
+              // text(tweetName + "   ..." + tweetTime, 45 + thePadding, 300, textBoxW, textBoxH);
               /// draw the image
-              String picPosX = textWidth(headerText)/2;
-              object t = uniqueTweets.get(tId); // get(tId);
-              image(t.profileImage, picPosX, 300);
+              
+              
+              if(showPic){
+                  picWidth = 60;
+              
+                  try{
+                      //half the screen width - half the text box width
+                      int picPosX = round(1024/2) - round(textWidth(headerText)/2);
+                      object t = uniqueTweets.get(tId); // get(tId);
+                      image(t.profileImage, picPosX, 300 - picAdjY);
+                  } catch(e:error){
+                      console.log("can't find tweet object: ");
+                  }
+              } else {
+                  picWidth = 0;
+              }
 
               
               /// tweet text
@@ -654,34 +699,33 @@
               /// only render if it's in the viewable area
               if(theY > -tBoxSpace && theY < 800){
 
-                  object t = uniqueTweets.get(tId); // get(tId);
-                  /* tweet on top, person on bottom 
-                  // set the main tweet text
-                  text(tweetText, theMargin, theY, textBoxW, textBoxH);               
-                  text(tweetName + "   ..." + tweetTime, theMargin + 60, theY + lineHeight * (numLines+1), textBoxW, lineHeight);
-                  // console.log("HEIGHT: " + tweetName + " " + textBoxH);
-                  // Draw the profile image
-                  image(t.profileImage, theMargin, theY + lineHeight *(numLines+1));
-                   */
-                  // Draw the profile image
-                  image(t.profileImage, theMargin, theY);
+                  if(showPic){
+                      picWidth = 60;
+                      object t = uniqueTweets.get(tId); // get(tId);
+                      // Draw the profile image
+                      try{
+                          image(t.profileImage, theMargin, theY - picAdjY);
+                      } catch(e:error){
+                        console.log("can't find tweet object: " + e);
+                    }
+                  } else {
+                      picWidth = 0;
+                  }
+
                   // do the "from" name
-                  thePadding = 60;
-                  
-                  /// check height?
-                  int textHeightInPixels = textAscent() + textDescent();
-                  // console.log("TOTAL HEIGHT MAYBE: " + textHeightInPixels);
-                  
                   textFont(ItalicFont, tSize);
-                  text(tweetName + "   ..." + tweetTime, theMargin + thePadding, theY, textBoxW, lineHeight);
+                  text(tweetName + "   ..." + tweetTime, theMargin + picWidth, theY, textBoxW, lineHeight);
                   // console.log("HEIGHT: " + tweetName + " " + textBoxH);
                   // set the main tweet text
                   textFont(BasicFont,tSize);
                   text(tweetText, theMargin, theY + lineHeight, textBoxW, textBoxH);
-                // move
+                  
+                   // move
                   //// show text box
+                  /*
                   fill(60,60,60,60);
                   rect(theMargin, theY, textBoxW, textBoxH);
+                   */
               }
               theY += tAnimSpeed;
               if(theY >= vertScrollHeight - tBoxSpace){
@@ -746,7 +790,7 @@ class Timer {
         <div id="interface">
         <div id="header_label"><a href="#"><img src="images/header.png" width="253" height="33"></a></div>
         <div id="closeButton"><a href="#" onClick="hideOverlay(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a></div>
-        <div id="searchterm"><img src="images/butt_search_term.png" width="175" height="23"><input type="search" name="twittersearch" size="73" onsearch="changeSearch(this.value)"/></div>
+        <div id="searchterm"><img src="images/butt_search_term.png" width="175" height="23"><input type="search" name="twittersearch" size="73" onsearch="changeSearch(this.value)" /></div>
         <div id="speedslider"><img src="images/butt_speed.png" width="97" height="23"><input type="range" min="0" max="20" value="5" step="1" onchange="showValue(this.value)"/></div>
         <div id="animation_type"><img src="images/animation.png" width="151" height="23"> 
 	        <select id="animation" onchange="changeAnim(this.value)">
@@ -757,7 +801,7 @@ class Timer {
 			</optgroup>
 			</select>
 		</div>
-        
+        <div id="showPic"><img src="images/butt_showpic.png" width="121" height="23"><input type="checkbox" onchange="togglePic(this.value)"/></div>
         
         <!-- 
        

@@ -14,20 +14,27 @@
 	<!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
     <link href="css/style.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" type="text/css" href="css/themes.css" />
+    <link rel="stylesheet" href="css/farbtastic.css" type="text/css" />
+        
     <script type="text/javascript" charset="utf-8" src="cordova-1.7.0.js"></script>
     <script src="js/processing.js" type="text/javascript"></script>
   	<script src="js/processing-twitter.js" type="text/javascript"></script>
-    <script type="text/javascript" src="js/colorpicker.min.js"></script>
-    <!-- <script type="text/javascript" src="js/jquery.1.6.1.min.js"></script> !-->
+    <!--<script type="text/javascript" src="js/colorpicker.js"></script>
+    <script type="text/javascript" src="js/jscolor/jscolor.js"></script> !-->
+        
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/farbtastic.js"></script>
+
+        
     <script type="text/javascript">
 	// If you want to prevent dragging, uncomment this section
-	//*
+	/*
 	function preventBehavior(e) 
 	{ 
       e.preventDefault(); 
     };
 	document.addEventListener("touchmove", preventBehavior, false);
-	//*/
+	*/
 	
 	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
 	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
@@ -43,7 +50,12 @@
 	{		
 		document.addEventListener("deviceready", onDeviceReady, false);
 	}
-	
+        
+    // turn off app when the back key is down
+    function onDeviceReady(){
+        document.addEventListener("backbutton",onBackKeyDown,true);
+    }
+        
 	/* When this function is called, Cordova has been initialized and is ready to roll */
 	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
 	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
@@ -53,20 +65,8 @@
 		
        
 	}
-        
-    /// INTERFACE VARS
-        var theOverlay;
-        var theSearchTerm;
-        var processingInstance;
-        
-    /// DEVICE VARS
-        // The global capture object
-        var capture = navigator.device.capture;
-        // limit capture operation to 3 images, ios doesn't use this
-        var options = { limit: 3 };
-
-        
     /// INTERFACE FUNCTIONS
+    var theOverlay;
     // show and hide
     // this is called from the canvas
     function showOverlay(theID){
@@ -84,10 +84,25 @@
         processingInstance.overlayOff();
     }
         
+    ///////// DEVICE FUNCTIONS ////////
+
+    function onBackKeyDown(){
+        console.log("Hit Home Key");
+        navigator.device.exitApp();
+    }
+        
     /// PROCESSING CONTROL FUNCTIONS ////
+    var processingInstance;
+    function testCom() {
+      if (!processingInstance) {
+          processingInstance = Processing.getInstanceById('tweets');
+        }
+           
+           processingInstance.checkConsoleLog(); // stop animation, call noLoop()
+      }
     
     /// speed slider
-    function changeSpeed(newValue){
+    function showValue(newValue){
     	/// document.getElementById("range").innerHTML=newValue;
     	processingInstance = Processing.getInstanceById('tweets');
     	processingInstance.changeAnimSpeed(newValue);
@@ -100,153 +115,69 @@
     	console.log("ACTIVATING ANIM CHANGE" + animType);
     	
     }
-        
+    /// search function
     function changeSearch(searchTerm){
-        theSearchTerm = searchTerm;
-        console.log("CHANGE search PARAM: " + theSearchTerm);
-        // goSearch();
+        console.log("CHANGE SEARCH: " + searchTerm);
+        processingInstance = Processing.getInstanceById('tweets');
+    	processingInstance.initSearch(searchTerm);
       
     }
-    function goSearch(){
-        console.log("GO SEARCH: " + theSearchTerm);
-        processingInstance = Processing.getInstanceById('tweets');
-        processingInstance.initSearch(theSearchTerm);
-            
-            
-    }
+        /// toggle twitter pic
     function togglePic(toggleValue){
         console.log("TOGGLE PIC:  " + toggleValue);
         processingInstance = Processing.getInstanceById('tweets');
     	processingInstance.togglePic(toggleValue);
 
     }
-        
-    function saveConfig(){
-            
+    /// change background color
+    function changeBGColor(hexColor){
+        // console.log("INIT BG COLOR CHANGE:  " + hexColor);
+         Processing.getInstanceById('tweets').changeBGColor(hexColor);    
+    }
+    function changeFontColor(hexColor){
+        Processing.getInstanceById('tweets').changeFontColor(hexColor);
             
     }
+        
+        /// end PROCESSING CONTROL
     
-    /// SHOW AND HIDE THE HELP /////////////
-    function showHelp(){
-        theHelp = document.getElementById("help_panel");
-        theHelp.style.display = "block";
-   
-            
-    }
-    function hideHelp(){
-        theHelp = document.getElementById("help_panel");
-        theHelp.style.display = "none";
+    </script>
         
-    
-    }
+    <!-- COLOR PICKER CODE !-->
         
-    /// end PROCESSING CONTROL
+        <script type="text/javascript" charset="utf-8">
+            $(document).ready(function() {
+                              $('#color_picker').hide();
+                              var f = $.farbtastic('#picker');
+                              var p = $('#picker');
+                              var selected;
+                              $('.colorwell')
+                              .each(function () { f.linkTo(this); $(this).css('opacity', 0.75); })
+                              .focus(function() {
+                                     if (selected) {
+                                     $(selected).css('opacity', 0.75).removeClass('colorwell-selected');
+                                     }
+                                     f.linkTo(this);
+                                     p.css('opacity', 1);
+                                     $(selected = this).css('opacity', 1).addClass('colorwell-selected');
+                                     });
+                              });
+            </script>
         
-    ////// CAMERA and PICTURE UPLOAD FUNCTIONS /////////////
-        var pictureSource;   // picture source
-        var destinationType; // sets the format of returned value
-        
-        // Wait for Cordova to connect with the device
-        //
-        document.addEventListener("deviceready",onDeviceReady,false);
-        
-        // Cordova is ready to be used!
-        //
-        function onDeviceReady() {
-            pictureSource=navigator.camera.PictureSourceType;
-            destinationType=navigator.camera.DestinationType;
+        <style type="text/css" media="screen">
+        .colorwell {
+        border: 2px solid #fff;
+        width: 6em;
+        text-align: center;
+        cursor: pointer;
         }
+        body .colorwell-selected {
+        border: 2px solid #000;
+        font-weight: bold;
+        }
+        </style>
         
-        // Called when a photo is successfully retrieved
-        //
-        function onPhotoDataSuccess(imageData) {
-            // Uncomment to view the base64 encoded image data
-            // console.log(imageData);
-            
-            // Get image handle
-            //
-            var smallImage = document.getElementById('smallImage');
-            
-            // Unhide image elements
-            //
-            smallImage.style.display = 'block';
-            
-            // Show the captured photo
-            // The inline CSS rules are used to resize the image
-            //
-            smallImage.src = "data:image/jpeg;base64," + imageData;
-        }
-        
-        // Called when a photo is successfully retrieved
-        //
-        function onPhotoURISuccess(imageURI) {
-            // Uncomment to view the image file URI
-            console.log("SELECTED IMAGE: " + imageURI);
-            
-            // Get image handle
-            //
-            /*
-            var largeImage = document.getElementById('largeImage');
-            
-            // show the image in a div tag
-            // Unhide image elements
-            
-            largeImage.style.display = 'block';
-            
-            // Show the captured photo
-            // The inline CSS rules are used to resize the image
-            //
-            largeImage.src = imageURI;
-            
-            */
-            /// save to the processing skech
-            processingInstance = Processing.getInstanceById('tweets');
-            processingInstance.setBackgroundImage(imageURI);
-        }
-        
-        // simple capture
-        /*
-        function capturePhoto() {
-            // Take picture using device camera and retrieve image as base64-encoded string
-            navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 50,
-                                        destinationType: destinationType.DATA_URL });
-        }
-         */
-        /*
-        function capturePhotoEdit() {
-            // Take picture using device camera, allow edit, and retrieve image as base64-encoded string
-            navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 20, allowEdit: true,
-                                        destinationType: destinationType.DATA_URL });
-        }
-        */
-        // GET PHOTO
-        //
-        function getPhoto(source) {
-            // Retrieve image file location from specified source
-            navigator.camera.getPicture(onPhotoURISuccess, onFail, { quality: 50, 
-                                        destinationType: destinationType.FILE_URI,
-                                        sourceType: source });
-        }
-        
-        // FAIL FUNCTIONS.
-        // 
-        function onFail(message) {
-            alert('Failed because: ' + message);
-        }
-        
-        /// DELETE BACKGROUND IMAGE
-        function deletePhoto(){
-            
-            processingInstance = Processing.getInstanceById('tweets');
-            processingInstance.deleteBackgroundImage();
-
-            
-        }
-        </script>
-    </head>
-    
-  <!-- ////////////// START THE BODY OF THE DOCUMENT ///////////////////// !-->
-    
+  </head>
   <body onLoad="onBodyLoad()">
   <!--
   A port of http://blog.blprnt.com/blog/blprnt/updated-quick-tutorial-processing-twitter by Jer Thorp's
@@ -256,7 +187,7 @@
   -->
   <script id='sketch' type="application/processing">
      
-      // ArrayList<String> words = new ArrayList();
+      ArrayList<String> words = new ArrayList();
 
       // Global ArrayList of tweets is created in processing-twitter.js
       // ArrayList<Tweet> tweets = new ArrayList();
@@ -279,8 +210,6 @@
       
       boolean showPic = true;
       
-      boolean showBGImage = false;
-      
       string searchTerm;
       
       // Dynamic list of Tweet objects
@@ -294,11 +223,11 @@
       // for some reason Processing wants to reset the text sizes
       /// I think I can get rid of this
       int[] TextSizes;
-      // int[] TextPosY;
+      int[] TextPosY;
       float oldLineHeight;
       float newLineHeight;
       
-      int curTextID; /// id for text object to be faded
+	   int curTextID; /// id for texxt object to be faded
 
  	/// FONTS
       PFont BasicFont = createFont("Arial", 24, true);
@@ -307,13 +236,13 @@
       PFont fontOne;
       PFont fontTwo;
 
-      PImage bgroundImage;
+      // PImage tweetPic;
       
       /// ANIMATION PRESETS
       // scroll
       int tBoxSpace = 400; /// this is the spacing between scrolling tweet objects
       int tweetTextSize = 24;
-	  string animationType = "scroll"; // "fade", "wipeleft", "wiperight", "random"
+	  string animationType = "fade"; // "fade", "wipeleft", "wiperight", "random"
 	  boolean fadeOutReady = false;
 	  int vertScrollHeight; // height of all the vertically scrolling tweets
       int theMargin = 50; // margins from side to side
@@ -337,7 +266,7 @@
       // hash map that holds our tweets and images
       uniqueTweets = new HashMap();
         
-      // colorMode(ARGB);
+      colorMode(RGB, 100);
       /// size(window.innerWidth, window.innerHeight-10);
       background(bgColor);
       smooth();
@@ -353,9 +282,9 @@
       void initSearch(string tSearch){
           // zero out everything
           searchTerm = tSearch;
-          console.log("INit search: " + searchTerm);
           try{
-              tweets.clear();
+              // tweets.clear();
+              curTextID = 0;
               // hash map that holds our tweet objects and images
               uniqueTweets = new HashMap();
               // text object array that holds all the text objects
@@ -364,11 +293,8 @@
               // set text sizes, pre-populate the array
               /// I don't think we need this anymore
               TextSizes = new int[100];
-              // TextPosY = new int[100];
+              TextPosY = new int[100];
               TextSizes[0] = tweetTextSize;
-              
-              // reset the fade params
-              // resetTextObjectFade();
 
           } catch (e:Error){
               
@@ -389,7 +315,8 @@
       
       /// does the initial spawn
       void spawnText(){
-                   /*
+          
+          /*
           String[] fontList = PFont.list();
           console.log(fontList);
            */
@@ -398,9 +325,9 @@
           
           // If we haven't created the text objects, do it now
           if (tweets.size() > 0){
-            console.log("spawn text objects: " + tweets.size());
-            for (int i = 0; i < tweets.size(); i++) {
-
+              console.log("spawn text objects: " + tweets.size());
+              for (int i = 0; i < tweets.size(); i++) {
+			
               Tweet t = (Tweet) tweets.get(i);
               /// get tweet data
               String msg = t.text;
@@ -437,7 +364,7 @@
           console.log("TOTAL TWEETS: " + tweets.size() + "TOTAL BOX HEIGHT = " + vertScrollHeight + " JUST SPACING: "  + tweets.size()*tBoxSpace);
 
           totalNumTweets =  tweets.size();
-          // tweets.clear();
+          tweets.clear(); /// why do we want to clear the tweets after this?
 		  hasTweets = true;
          
 
@@ -447,13 +374,6 @@
 
     void draw() {
         background(bgColor);
-        
-        /// DO THE BGROUND IMAGE
-        if(showBGImage){
-            
-            image(bgroundImage, 0, 0);
-        }
-
          // CHECK FOR TWITTER DATA
         // if none, spawn the text object
         if (!hasTweets) {
@@ -491,8 +411,8 @@
       void changeBGColor(String theColor){
           if(interfaceShowing){
               string dColor = theColor.substring(1);
-              color newc = unhex("FF" + dColor);
-              bgColor = newc;
+              color hi = unhex("FF" + dColor);
+              bgColor = hi;
           }
           
       }
@@ -526,7 +446,8 @@
       void togglePic(){
           
           if(showPic){
-
+              
+              
               showPic = false;
           } else if(!showPic){
               showPic = true;
@@ -537,17 +458,18 @@
 	  //// change animation type
       void changeAnimationType(String animType){
 		animationType = animType;
+          reSetTextObjectFade();
 		// console.log("SWITCH animationType CASE");
 	  }
 
       void doTextObjectAnim(){
 		// animationType = tType;
         switch(animationType) {
-  		case 'fade': 
+  		case 'fade':
+            // reSetTextObjectFade();
     		setTextObjectFade();
     		break;
-  		case 'scroll':
-
+  		case 'scroll': 
 			setTextObjectScroll();
     		break;
   		case 'wipe': 
@@ -557,33 +479,6 @@
     		break;
 		}
       }
-      
-      //// BACKGROUND IMAGE FUNCTIONS /////
-      void setBackgroundImage(String imagePath){
-          console.log("Processing has image: " + imagePath);
-
-          String bgPath = imagePath;
-          // Load image from the ipad
-          try{
-              bgroundImage = new PImage;
-              bgroundImage = loadImage(bgPath);
-              // bgroundImage = loadImage("http://www.ericmedine.com/temps/logo_no_bg_small.png"); // logo_no_bg_small.png
-              showBGImage = true;
-          } catch (Exception e){
-              
-              console.log("CAN'T LOAD IMAGE: " + e);
-          }
-          
-          
-      }
-      void deleteBackgroundImage(){
-          
-          showBGImage = false;
-          console.log("DELETE BG IMAGE: " + showBGImage);
-          
-          
-      }
-
 	
 	///// SET ALL TEXT OBJECT ANIMATION //////
 	public void setTextObjectFade(){
@@ -604,32 +499,35 @@
                 	dTextObj.doFade();
 				} 
                 
-            } catch (e:error){
+            } catch (Exception:e){
                 println("Can't find object for fade: " + e);
             }
         }	
 	}
       
-    //////// RESET text object fade
-    public void resetTextObjectFade(){
-        /// check to see if there's any text objects
-        if(TextObjectArray.size() >0){
-            console.log("reset text objects: " + TextObjectArray.size());
-            for (int i = 0; i < TextObjectArray.size(); i++){
-            try{
-                // update text object fade in toggle
-                TextObject dTextObj = TextObjectArray.get(i);
-                dTextObj.hasFaded = false;
-                
-                } catch (Exception : e){
-                    rintln("Can't reset fade: " + e);
-                }
-            }
-        } else {
-            
-            // console.log("No tweet text objects: " + TextObjectArray.size());
-        }
-    }
+      /// RESET TEXT OBJECT FADE
+      public void reSetTextObjectFade(){
+          curTextID = 0;
+          console.log("RESET FADE: " + TextObjectArray.size());
+          for (int i = 0; i < TextObjectArray.size(); i++){
+              
+              try{
+                  
+                  // update text object
+                  // if it hasn't faded in and out,
+                  // init fade in toggle
+                  TextObject dTextObj = TextObjectArray.get(i);
+                  dTextObj.hasFaded = true;
+                  dTextObj.fadeIn = false;
+                  dTextObj.fadeHold = false;
+                  dTextObj.fadeOut = false;
+                  
+              } catch (Exception:e){
+                  println("Can't find object to reset fade: " + e);
+              }
+          }	
+      }
+
 
 	public void setTextObjectScroll(){
 		for (int i = 0; i < TextObjectArray.size(); i++){
@@ -638,7 +536,7 @@
                 TextObject dTextObj = TextObjectArray.get(i);
                 dTextObj.doScrollAnim();
                 
-            } catch (e:error){
+            } catch (Exception:e){
                 println("can't find object for scroll" + e);
             }
         }
@@ -647,7 +545,6 @@
 
 	//// END SET ALL TEXT OBJECT ANIM /////
       
-          
     ///// DEVICE FUNCTIONS
       // stop app when hit home
       
@@ -660,7 +557,11 @@
       /// error message
         // on
         // off
-
+      
+      // help window
+      
+      // info window
+      
     //// TEXT OBJECT /////////
       // /*
       class TextObject {
@@ -674,7 +575,7 @@
           int tSize= 36; // text size
           // int tSpacing = 60; // single line spacing
           int tId; // id of the tweet
-		  int fadeLevel = 0;
+		  int fadeLevel = 255;
           color fadeColor = (0,0,0,fadeLevel);
 
 		  // text box sizes
@@ -751,11 +652,11 @@
 			/// set position
               // update fade speed
               // map(value, start1, stop1, start2, stop2)
-              fadeSpeed = map(tAnimSpeed, 0, 20, 20000, 300);
+              fadeSpeed = map(tAnimSpeed, 0, 20, 20000, 500);
               
 			 if(fadeIn){ //// fading in
-				fadeLevel +=10;
-				if(fadeLevel >= 255){
+				fadeLevel -=tAnimSpeed;
+				if(fadeLevel < 0){
 					hasFaded = true;
 					fadeIn = false;
 					fadeHold = true;
@@ -781,8 +682,8 @@
 
 			}
 			if (fadeOut){ //// fade out
-				fadeLevel -=10;
-				if(fadeLevel < 0){
+				fadeLevel +=tAnimSpeed;
+				if(fadeLevel >=255){
 					// console.log("DONE FADING OUT");
 					fadeIn = true;
 					fadeHold = false;
@@ -804,29 +705,26 @@
 
 			}
               
-              /// "from" text, get this first so we can set up the position of the pic
+              // do the "from" name
+			  //// draw the text box
+              fill(tFontColor);
+ 			  textAlign(CENTER);
+              /// "from" text
               string headerText = tweetName + "   ..." + tweetTime;
-
+              textFont(ItalicFont, tSize);
+              text(tweetName + "   ..." + tweetTime, theMargin + picWidth, 300, textBoxW, textBoxH);
+              // text(tweetName + "   ..." + tweetTime, 45 + thePadding, 300, textBoxW, textBoxH);
+              /// draw the image
+              
+              
               if(showPic){
                   picWidth = 60;
               
                   try{
                       //half the screen width - half the text box width
-                      /*
-                       PImage img = loadImage("rockies.jpg");
-                       background(img);
-                       PImage img2 = img.get(50, 0, 50, 100);
-                       image(img2, 0, 0); 
-                       */
-                      //half the screen width - half the text box width
                       int picPosX = round(1024/2) - round(textWidth(headerText)/2);
                       object t = uniqueTweets.get(tId); // get(tId);
-                      PImage twitPic = t.profileImage;
-                      PImage newPic;
-                      newPic = twitPic; // .get(0,0,20,20);
-                      image(newPic, picPosX, 300 - picAdjY);
-                      
-                      
+                      image(t.profileImage, picPosX, 300 - picAdjY);
                   } catch(e:error){
                       console.log("can't find tweet object: ");
                   }
@@ -834,14 +732,6 @@
                   picWidth = 0;
               }
 
-              // do the "from" name
-			  //// draw the text box
-              fill(tFontColor, fadeLevel);
- 			  textAlign(CENTER);
-              textFont(ItalicFont, tSize);
-              text(tweetName + "   ..." + tweetTime, theMargin + picWidth, 300, textBoxW, textBoxH);
-              // text(tweetName + "   ..." + tweetTime, 45 + thePadding, 300, textBoxW, textBoxH);
-              /// draw the image
               
               /// tweet text
 			  textFont(BasicFont,tSize);
@@ -849,12 +739,9 @@
               textWidth(1024);
               
               /// cover it up to fake a fade
-              /// grrr, can't do this with the bg
-              /*
               fadeColor = color(bgColor,fadeLevel);
               fill(fadeColor);
               rect(0,0,tWidth, tHeight);
-               */
               
 
               
@@ -872,7 +759,7 @@
               fill(tFontColor);
 			  // text(s, 10, 10, 70, 80);
 			  // text(tweetText, theX, theY);
-
+              
               /// only render if it's in the viewable area
               if(theY > -tBoxSpace && theY < 800){
 
@@ -882,7 +769,7 @@
                       // Draw the profile image
                       try{
                           image(t.profileImage, theMargin, theY - picAdjY);
-                      } catch(Exception : e){
+                      } catch(e:error){
                         console.log("can't find tweet object: " + e);
                     }
                   } else {
@@ -943,7 +830,7 @@ class Timer {
     savedTime = millis(); 
   }
   
-  // The function isFinished() returns true if the set number of ms have passed. 
+  // The function isFinished() returns true if 5,000 ms have passed. 
   // The work of the timer is farmed out to this method.
   boolean isFinished() { 
     // Check how much time has passed
@@ -967,112 +854,33 @@ class Timer {
         <div id="interface">
         <div id="header_label"><a href="#"><img src="images/header.png" width="253" height="33"></a></div>
         <div id="closeButton"><a href="#" onClick="hideOverlay(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a></div>
-        <div id="searchterm"><img src="images/butt_search_term.png" width="175" height="23"><input type="search" name="twittersearch" value="lady gaga"size="50" onsearch="changeSearch(this.value)" /><input type="button" id="goButton" onclick="goSearch()" value="go!"></input></div>
-        <div id="speedslider"><img src="images/butt_speed.png" width="97" height="23"><input type="range" min="0" max="20" value="5" step="1" onchange="changeSpeed(this.value)"/></div>
+        <div id="searchterm"><img src="images/butt_search_term.png" width="175" height="23"><input type="search" name="twittersearch" size="73" onsearch="changeSearch(this.value)" /></div>
+        <div id="speedslider"><img src="images/butt_speed.png" width="97" height="23"><input type="range" min="0" max="20" value="5" step="1" onchange="showValue(this.value)"/></div>
         <div id="animation_type"><img src="images/animation.png" width="151" height="23"> 
 	        <select id="animation" onchange="changeAnim(this.value)">
-			<optgroup selected="selected" label="Animation Type" value="fade"></option>
-            <option value ="scroll">Scroll</option>
-
+			<optgroup selected="selected" label="Animation Type" value="fade">Fade</option>
 			<option value ="fade">Fade</option>
 			<option value ="scroll">Scroll</option>
 			<option value ="wipe" >Wipe</option>
 			</optgroup>
 			</select>
 		</div>
-            
-        <div id="showPic"><img src="images/butt_showpic.png" width="121" height="23"><div id="checkboxStyle"><input type="checkbox" onchange="togglePic(this.value)"/></div></div>
-           <div>
-           <ul id="colorpicker_container">
-	            <!-- background color picker !-->
-	            <li>
-	            <img src="images/butt_bgcolor.png" width="213" height="23" >
-	            <br>
-	            <div class="cp-default" style="margin-top:10px;">
-	                <div class="picker-wrapper">
-	                    <div class="picker"></div>
-	                    <div class="picker-indicator"></div>
-	                </div>
-	                <div class="slide-wrapper">
-	                    <div class="slide"></div>
-	                    <div class="slide-indicator"></div>
-	                </div>
-	            </div>
-	            </li>
-	            <!-- font color picker !-->
-	            <li>
-	             <img src="images/butt_fontocolor.png" width="121" height="23">
-	            <br>
-	            <div class="cp-default"  style="margin-top:10px;">
-	                <div class="picker-wrapper">
-	                    <div class="picker"></div>
-	                    <div class="picker-indicator"></div>
-	                </div>
-	                <div class="slide-wrapper">
-	                    <div class="slide"></div>
-	                    <div class="slide-indicator"></div>
-	                </div>
-	            </div>
-	            </li>
-                <li>
-                   <div id="config_container">
-                   <a href="#" onClick="getPhoto(pictureSource.PHOTOLIBRARY); return false;"><img src="images/butt_upload.png" width="128" height="47"></a><br>
-                   <a href="#" onClick="deletePhoto(); return false;"><img src="images/butt_delete.png" width="128" height="47"></a><br><br><br><br>
-                   <a href="#" onClick="showHelp(); return false;"><img src="images/butt_help.png" width="128" height="47"></a><br>
-                   <img src="images/butt_save.png" width="128" height="47"><br>
-                   </div>
-                    
-                </li>
-	        </ul>
-            </div>
-            <!-- COLOR PICKER CODE !-->
-            
-            <script type="text/javascript">
-                var theProcessing = Processing.getInstanceById('tweets');
-                console.log(theProcessing);
-                var slides = [], pickers = [], slideIndicators = [], pickerIndicators = [],
-                c = [], i, len, divs = document.getElementsByTagName('*');
-                
-                for (i = 0, len = divs.length; i < len; i++) {
-                    switch (divs[i].className) {
-                        case 'slide': slides.push(divs[i]); break;
-                        case 'picker': pickers.push(divs[i]); break;
-                        case 'slide-indicator': slideIndicators.push(divs[i]); break;
-                        case 'picker-indicator': pickerIndicators.push(divs[i]); break;
-                    }
-                }
-                
-                for (i = 0, len = slides.length; i < len; i++) {
-                    c.push(ColorPicker(slides[i], pickers[i]));
-                }
-                
-                c[0].callback = function(hex, hsv, rgb, mousePicker, mouseSlide) {
-                    ColorPicker.positionIndicators(
-                                                   slideIndicators[0], pickerIndicators[0],
-                                                   mouseSlide, mousePicker
-                                                   );
-                    console.log("CHANGING: " + hex);
-                    // document.body.style.backgroundColor = hex;
-                   // theProcessing.changeFontColor(hex);
-                                       Processing.getInstanceById('tweets').changeBGColor(hex);
-                };
-                
-                c[1].callback = function(hex, hsv, rgb, mousePicker, mouseSlide) {
-                    ColorPicker.positionIndicators(
-                                                   slideIndicators[1], pickerIndicators[1],
-                                                   mouseSlide, mousePicker
-                                                   );
-                    Processing.getInstanceById('tweets').changeFontColor(hex);
+        <div id="showPic"><img src="images/butt_showpic.png" width="121" height="23"><input type="checkbox" onchange="togglePic(this.value)"/></div>
 
-                };
-                
-                </script>
-        </div>
-       <!-- HELP SECTION !-->     
-      <div id="help_panel" style="display:none;">
-            <div id="help_label"><a href="#"><img src="images/header_help.png" width="108" height="33"></a></div>
-            <div id="help_closeButton"><a href="#" onClick="hideHelp(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a></div>
-          
-                
+           <div id="colorpicker_container">
+               <!-- COLOR PICKER CODE !-->
+               <div id="color_picker" style="color: red; font-size: 1.4em"></div>
+               
+               <form action="" style="width: 500px;">
+                   <div id="picker" style="float: left;"></div>
+                   <div class="form-item"><label for="color1"><img src="images/butt_fontocolor.png" width="121" height="23"></label><input type="text" id="color1" name="color1" class="colorwell" value="#123456" /></div>
+                   <div class="form-item"><img src="images/butt_bgcolor.png" width="213" height="23" ><input type="text" id="color2" name="color2" class="colorwell" value="#123456"/></div>
+               </form>
+	        
+            </div>
+            
+            
+                        
+           
         </div>
 </html>

@@ -13,12 +13,18 @@
 	-->
 	<!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
     <link href="css/style.css" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" type="text/css" href="css/themes.css" />
+    <link rel="stylesheet" href="css/farbtastic.css" type="text/css" />
+        
     <script type="text/javascript" charset="utf-8" src="cordova-1.7.0.js"></script>
     <script src="js/processing.js" type="text/javascript"></script>
   	<script src="js/processing-twitter.js" type="text/javascript"></script>
-    <script type="text/javascript" src="js/colorpicker.min.js"></script>
-    <!-- <script type="text/javascript" src="js/jscolor/jscolor.js"></script> !-->
+    <!--<script type="text/javascript" src="js/colorpicker.js"></script>
+    <script type="text/javascript" src="js/jscolor/jscolor.js"></script> !-->
+        
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/farbtastic.js"></script>
+
+        
     <script type="text/javascript">
 	// If you want to prevent dragging, uncomment this section
 	/*
@@ -43,7 +49,12 @@
 	{		
 		document.addEventListener("deviceready", onDeviceReady, false);
 	}
-	
+        
+    // turn off app when the back key is down
+    function onDeviceReady(){
+        document.addEventListener("backbutton",onBackKeyDown,true);
+    }
+        
 	/* When this function is called, Cordova has been initialized and is ready to roll */
 	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
 	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
@@ -72,6 +83,13 @@
         processingInstance.overlayOff();
     }
         
+    ///////// DEVICE FUNCTIONS ////////
+
+    function onBackKeyDown(){
+        console.log("Hit Home Key");
+        navigator.device.exitApp();
+    }
+        
     /// PROCESSING CONTROL FUNCTIONS ////
     var processingInstance;
     function testCom() {
@@ -96,24 +114,57 @@
     	console.log("ACTIVATING ANIM CHANGE" + animType);
     	
     }
-        
+    /// search function
     function changeSearch(searchTerm){
         console.log("CHANGE SEARCH: " + searchTerm);
         processingInstance = Processing.getInstanceById('tweets');
     	processingInstance.initSearch(searchTerm);
       
     }
+        /// toggle twitter pic
     function togglePic(toggleValue){
         console.log("TOGGLE PIC:  " + toggleValue);
         processingInstance = Processing.getInstanceById('tweets');
     	processingInstance.togglePic(toggleValue);
 
     }
+    /// change background color
+    function changeBGColor(hexColor){
+        // console.log("INIT BG COLOR CHANGE:  " + hexColor);
+         Processing.getInstanceById('tweets').changeBGColor(hexColor);    
+    }
+    function changeFontColor(hexColor){
+        Processing.getInstanceById('tweets').changeFontColor(hexColor);
+            
+    }
         
         /// end PROCESSING CONTROL
     
     </script>
-         </head>
+        
+    <!-- COLOR PICKER CODE !-->
+        
+        <script type="text/javascript" charset="utf-8">
+            $(document).ready(function() {
+                              $('#color_picker').hide();
+                              var f = $.farbtastic('#picker');
+                              var p = $('#picker');
+                              var selected;
+                              $('.colorwell')
+                              .each(function () { f.linkTo(this); $(this).css('opacity', 0.75); })
+                              .focus(function() {
+                                     if (selected) {
+                                     $(selected).css('opacity', 1).removeClass('colorwell-selected');
+                                     }
+                                     f.linkTo(this);
+                                     p.css('opacity', 1);
+                                     $(selected = this).css('opacity', 1).addClass('colorwell-selected');
+                                     });
+                              });
+            </script>
+
+        
+  </head>
   <body onLoad="onBodyLoad()">
   <!--
   A port of http://blog.blprnt.com/blog/blprnt/updated-quick-tutorial-processing-twitter by Jer Thorp's
@@ -791,99 +842,46 @@ class Timer {
         <div id="header_label"><a href="#"><img src="images/header.png" width="253" height="33"></a></div>
         <div id="closeButton"><a href="#" onClick="hideOverlay(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a></div>
         <div id="searchterm"><img src="images/butt_search_term.png" width="175" height="23"><input type="search" name="twittersearch" size="73" onsearch="changeSearch(this.value)" /></div>
-        <div id="speedslider"><img src="images/butt_speed.png" width="97" height="23"><input type="range" min="0" max="20" value="5" step="1" onchange="showValue(this.value)"/></div>
-        <div id="animation_type"><img src="images/animation.png" width="151" height="23"> 
-	        <select id="animation" onchange="changeAnim(this.value)">
-			<optgroup selected="selected" label="Animation Type" value="fade">Fade</option>
-			<option value ="fade">Fade</option>
-			<option value ="scroll">Scroll</option>
-			<option value ="wipe" >Wipe</option>
-			</optgroup>
-			</select>
-		</div>
-        <div id="showPic"><img src="images/butt_showpic.png" width="121" height="23"><input type="checkbox" onchange="togglePic(this.value)"/></div>
-        
-        <!-- 
-       
-!-->
-           <div>
-           <ul id="colorpicker_container">
-	            <!-- background color picker !-->
-	            <li>
-	            <img src="images/butt_bgcolor.png" width="213" height="23" >
-	            <br>
-	            <div class="cp-default" style="margin-top:10px;">
-	                <div class="picker-wrapper">
-	                    <div class="picker"></div>
-	                    <div class="picker-indicator"></div>
-	                </div>
-	                <div class="slide-wrapper">
-	                    <div class="slide"></div>
-	                    <div class="slide-indicator"></div>
-	                </div>
-	            </div>
-	            </li>
-	            <!-- font color picker !-->
-	            <li>
-	             <img src="images/butt_fontocolor.png" width="121" height="23">
-	            <br>
-	            <div class="cp-default"  style="margin-top:10px;"">
-	                <div class="picker-wrapper">
-	                    <div class="picker"></div>
-	                    <div class="picker-indicator"></div>
-	                </div>
-	                <div class="slide-wrapper">
-	                    <div class="slide"></div>
-	                    <div class="slide-indicator"></div>
-	                </div>
-	            </div>
-	            </li>
-	        </ul>
-            </div>
-            <!-- COLOR PICKER CODE !-->
-            
-            <script type="text/javascript">
-                var theProcessing = Processing.getInstanceById('tweets');
-                console.log(theProcessing);
-                var slides = [], pickers = [], slideIndicators = [], pickerIndicators = [],
-                c = [], i, len, divs = document.getElementsByTagName('*');
+            <ul id="config_list">
+               <!-- COLOR PICKER CODE !-->   
+               <li>
+               <div id="colorpicker_container">
+               <div id="color_picker" style="color: red; font-size: 1.4em"></div>
+               <form action="" style="width: 500px;">
+                   <div id="picker" style="float: left;"></div>
+                   <div class="form-item" id="form-item">
+                       <img src="images/butt_fontocolor.png" width="121" height="23"><br>
+                       <input type="text" id="color1" name="color1" class="colorwell" value="#123456" readonly="true"/>
+                   </div>
+                   <br><br>
+                   <div class="form-item" id="form-item">
+                       <img src="images/butt_bgcolor.png" width="213" height="23" ><br>
+                       <input type="text" id="color2" name="color2" class="colorwell" value="#123456" readonly="true"/>
+                   </div>
+               </form>
+              </div>
+            <!-- load picture code !-->
+            <li>
+                <input type="text" class="simpleButton" value="Load Image" readonly="true"/><br>
+                <input type="text" class="simpleButton" value="Delete Image" readonly="true"/>
                 
-                for (i = 0, len = divs.length; i < len; i++) {
-                    switch (divs[i].className) {
-                        case 'slide': slides.push(divs[i]); break;
-                        case 'picker': pickers.push(divs[i]); break;
-                        case 'slide-indicator': slideIndicators.push(divs[i]); break;
-                        case 'picker-indicator': pickerIndicators.push(divs[i]); break;
-                    }
-                }
-                
-                for (i = 0, len = slides.length; i < len; i++) {
-                    c.push(ColorPicker(slides[i], pickers[i]));
-                }
-                
-                c[0].callback = function(hex, hsv, rgb, mousePicker, mouseSlide) {
-                    ColorPicker.positionIndicators(
-                                                   slideIndicators[0], pickerIndicators[0],
-                                                   mouseSlide, mousePicker
-                                                   );
-                    console.log("CHANGING: " + hex);
-                    // document.body.style.backgroundColor = hex;
-                   // theProcessing.changeFontColor(hex);
-                                       Processing.getInstanceById('tweets').changeBGColor(hex);
-                };
-                
-                c[1].callback = function(hex, hsv, rgb, mousePicker, mouseSlide) {
-                    ColorPicker.positionIndicators(
-                                                   slideIndicators[1], pickerIndicators[1],
-                                                   mouseSlide, mousePicker
-                                                   );
-                    Processing.getInstanceById('tweets').changeFontColor(hex);
-
-                };
-                
-                </script>
-
-            
-           
+            </li>
+                   
+            <!-- misc config code !-->
+            <li>
+            <div id="speedslider"><img src="images/butt_speed.png" width="97" height="23"><input type="range" class="speedslider" min="0" max="20" value="5" step="1" onchange="showValue(this.value)"/></div><br>
+            <div id="animation_type"><img src="images/animation.png" width="151" height="23">
+                <select id="animation" onchange="changeAnim(this.value)">
+                    <optgroup selected="selected" label="Animation Type" value="fade">Fade</option>
+                        <option value ="fade">Fade</option>
+                        <option value ="scroll">Scroll</option>
+                        <option value ="wipe" >Wipe</option>
+                    </optgroup>
+                </select>
+                </div><br>
+            <div id="showPic"><img src="images/butt_showpic.png" width="121" height="23"><input type="checkbox" onchange="togglePic(this.value)"/></div>
+            </li>
+            <!-- end interface !-->
+            </ul>
         </div>
 </html>

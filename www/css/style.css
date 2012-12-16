@@ -136,12 +136,12 @@ a { text-decoration: none; }
 /* interface styles */
 
 #interface{
-    width:872px;
+    width:1024px;
 	margin: 0 auto;
 	min-height:586px;
     position:absolute; 
-    top:91px;
-    left:72px;
+    top:400px;
+    left:0px;
     background: url('../images/interface_bground.png') no-repeat;
     
 }
@@ -167,15 +167,18 @@ a { text-decoration: none; }
 	vertical-align:top;
 }
 #speedslider{
+     /*
 	top:185px;
 	margin-left:85px;
 	margin-top:0px;
 	margin-bottom:0px;
 	float:left;
 	position:absolute;
+      */
 }
 
 #animation_type{
+     /*
 	top:185px;
 	margin-left:360px;
 	margin-right:0px;
@@ -183,70 +186,138 @@ a { text-decoration: none; }
 	margin-bottom:0px;
 	float:right;
 	position:absolute;
+      */
 	
 }
 #showPic{
+    /*
     display: table-cell;
 	top:185px;
 	margin-left:630px;
 	float:left;
 	position:absolute;
     vertical-align:middle;
+     */
 
 }
 #checkboxStyle{
+     /*
     display: table-cell;
 	top:3px;
     left:120px;
 	float:left;
 	position:absolute;
     vertical-align:middle;
-
+*/
     
     
 }
 #colorpicker_container{
-	margin-top:180px;
-	margin-left:85px;
 	float:left;
 	
 }
-ul#colorpicker_container li{
+
+#config_list{
+    
+    margin-top:180px;
+    margin-left:70px;
+    
+}
+
+ul#config_list li{
    list-style-type:none;
    float:left;
    text-align:left;
-   margin-right:30px;
+    margin-right:10px;
 }
 
-#config_container{
-    margin-top:35px;
-	float:left;
-
-    
-}
 
 #footer {
 	clear: both;
 }
 
-/* slider styles */
+/* INTERFACE STYLES */
+
+.simpleButton{
+    -webkit-border-radius: 25px; -moz-border-radius: 25px; border-radius: 25px;
+    border: 5px solid #cccccc;
+    width: 150px;
+    height: 50px;
+    text-align: center;
+    font-size: 24px;
+
+}
+.colorwell {
+    -webkit-border-radius: 25px; -moz-border-radius: 25px; border-radius: 25px;
+    border: 5px solid #000000;
+    width: 150px;
+    height: 50px;
+    text-align: center;
+    font-size: 24px;
+    cursor: pointer;
+}
+body .colorwell-selected {
+    border: 5px solid #FFFFFF;
+    font-weight: bold;
+}
+
 input [type='range'] {
     -webkit-appearance: none !important;
     background:white;
     height:7px;
 }
-input [type='range']::-webkit-slider-thumb {
-    -webkit-appearance: none !important;
-    background:white;
-    height:10px;
-    width:10px;
+input[type="range"]{
+    -webkit-appearance:none;
+    -webkit-border-radius:5px;
+    -moz-apperance:none;
+    width:100px;
+    height:20px;
 }
+.speedslider input::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:100px;
+    height:100x;
+        -moz-border-radius:10px;
+    -ms-border-radius:10px;
+    -o-border-radius:10px;
+    border-radius:10px;
+    color:#ffff00;
+}
+
 input [type='checkbox']{
     height:20px;
     width:20px;
-    
+
+}
+input [type='text']{
+    height:20px;
+    width:100px;
     
 }
+input[type='search'] {
+
+	text-align: left;
+	cursor: pointer;
+	display: block;
+	width: 150px;
+    /*
+	color: red;
+	letter-spacing: 4px;
+	text-shadow: 0 0 2px black;
+	word-spacing: 20px;
+     */
+}
+
+
+/* COLOR PICKER ITEM STYLES */
+
+#form-item{
+   margin-left:210px;
+}
+
+
+
+
 /* help window styles */
 #help_panel{
     width:872px;
@@ -271,16 +342,3 @@ input [type='checkbox']{
 	
 }
 
-/* nav positioning */
-
-
-ul#playernav a { color: #808080; }
-ul#playernav a:hover { color: #fff; }
-ul#playernav a div { height: 184px; margin-bottom: 20px; opacity: 1; }
-ul#playernav a:hover div { opacity: 1; }
-ul#playernav div#buttonL {center bottom no-repeat; }
-ul#playernav div#buttonR {center bottom no-repeat; }
-ul#playernav div#buttonJ {center bottom no-repeat; }
-ul#playernav div#buttonS {center bottom no-repeat; }
-ul#playernav div#buttonStart {center bottom no-repeat; }
-/* ul#playernav div#ultimateLogo { background: url('../images/07_tv/thumbnails/Campaign5_Ultimate_in_Entertainment.jpg') center bottom no-repeat; } */
