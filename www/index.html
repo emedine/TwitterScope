@@ -66,6 +66,8 @@
 	}
     /// INTERFACE FUNCTIONS
     var theOverlay;
+    var theLoader;
+    var theReadout;
     // show and hide
     // this is called from the canvas
     function showOverlay(theID){
@@ -82,7 +84,26 @@
         theOverlay.style.display = "none";
         processingInstance.overlayOff();
     }
+    
         
+    function showLoader(){
+        theReadout = document.getElementById("readout-style");
+        theReadout.style.display = "none";
+        
+        theLoader = document.getElementById("loading-style");
+        theLoader.style.display = "block";
+        //processingInstance.overlayOff();
+      
+            
+    }
+    function hideLoader(){
+        theLoader = document.getElementById("loading-style");
+        theLoader.style.display = "none";
+        
+        theReadout = document.getElementById("readout-style");
+        theReadout.style.display = "block";
+
+    }
     ///////// DEVICE FUNCTIONS ////////
 
     function onBackKeyDown(){
@@ -138,30 +159,131 @@
             
     }
         
-        /// end PROCESSING CONTROL
+    /// end PROCESSING CONTROL
+        
+        ////// CAMERA and PICTURE UPLOAD FUNCTIONS /////////////
+        var pictureSource;   // picture source
+        var destinationType; // sets the format of returned value
+        
+        // Wait for Cordova to connect with the device
+        //
+        document.addEventListener("deviceready",onDeviceReady,false);
+        
+        // Cordova is ready to be used!
+        //
+        function onDeviceReady() {
+            pictureSource=navigator.camera.PictureSourceType;
+            destinationType=navigator.camera.DestinationType;
+        }
+        
+        // Called when a photo is successfully retrieved
+        //
+        function onPhotoDataSuccess(imageData) {
+            // Uncomment to view the base64 encoded image data
+            // console.log(imageData);
+            
+            // Get image handle
+            //
+            var smallImage = document.getElementById('smallImage');
+            
+            // Unhide image elements
+            //
+            smallImage.style.display = 'block';
+            
+            // Show the captured photo
+            // The inline CSS rules are used to resize the image
+            //
+            smallImage.src = "data:image/jpeg;base64," + imageData;
+        }
+        
+        // Called when a photo is successfully retrieved
+        //
+        function onPhotoURISuccess(imageURI) {
+            // Uncomment to view the image file URI
+            console.log("SELECTED IMAGE: " + imageURI);
+            
+            // Get image handle
+            //
+            /*
+             var largeImage = document.getElementById('largeImage');
+             
+             // show the image in a div tag
+             // Unhide image elements
+             
+             largeImage.style.display = 'block';
+             
+             // Show the captured photo
+             // The inline CSS rules are used to resize the image
+             //
+             largeImage.src = imageURI;
+             
+             */
+            /// save to the processing skech
+            processingInstance = Processing.getInstanceById('tweets');
+            processingInstance.setBackgroundImage(imageURI);
+        }
+        
+        // simple capture
+        /*
+         function capturePhoto() {
+         // Take picture using device camera and retrieve image as base64-encoded string
+         navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 50,
+         destinationType: destinationType.DATA_URL });
+         }
+         */
+        /*
+         function capturePhotoEdit() {
+         // Take picture using device camera, allow edit, and retrieve image as base64-encoded string
+         navigator.camera.getPicture(onPhotoDataSuccess, onFail, { quality: 20, allowEdit: true,
+         destinationType: destinationType.DATA_URL });
+         }
+         */
+        // GET PHOTO
+        //
+        function getPhoto(source) {
+            // Retrieve image file location from specified source
+            navigator.camera.getPicture(onPhotoURISuccess, onFail, { quality: 50,
+                                        destinationType: destinationType.FILE_URI,
+                                        sourceType: source });
+        }
+        
+        // FAIL FUNCTIONS.
+        //
+        function onFail(message) {
+            alert('Failed because: ' + message);
+        }
+        
+        /// DELETE BACKGROUND IMAGE
+        function deletePhoto(){
+            
+            processingInstance = Processing.getInstanceById('tweets');
+            processingInstance.deleteBackgroundImage();
+            
+            
+        }
     
     </script>
         
     <!-- COLOR PICKER CODE !-->
         
-        <script type="text/javascript" charset="utf-8">
-            $(document).ready(function() {
-                              $('#color_picker').hide();
-                              var f = $.farbtastic('#picker');
-                              var p = $('#picker');
-                              var selected;
-                              $('.colorwell')
-                              .each(function () { f.linkTo(this); $(this).css('opacity', 0.75); })
-                              .focus(function() {
-                                     if (selected) {
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function() {
+                        $('#color_picker').hide();
+                        var f = $.farbtastic('#picker');
+                        var p = $('#picker');
+                        var selected;
+                        $('.colorwell')
+                        .each(function () { f.linkTo(this); $(this).css('opacity', 0.75); })
+                        .focus(function() {
+                                if (selected) {
                                      $(selected).css('opacity', 1).removeClass('colorwell-selected');
                                      }
                                      f.linkTo(this);
                                      p.css('opacity', 1);
                                      $(selected = this).css('opacity', 1).addClass('colorwell-selected');
                                      });
-                              });
-            </script>
+                        });
+    </script>
 
         
   </head>
@@ -214,7 +336,7 @@
       float oldLineHeight;
       float newLineHeight;
       
-	   int curTextID; /// id for texxt object to be faded
+      int curTextID; /// id for texxt object to be faded
 
  	/// FONTS
       PFont BasicFont = createFont("Arial", 24, true);
@@ -223,8 +345,10 @@
       PFont fontOne;
       PFont fontTwo;
 
+      // IMAGES
       // PImage tweetPic;
-      
+      PImage bgroundImage;
+      boolean showBGImage = false;
       /// ANIMATION PRESETS
       // scroll
       int tBoxSpace = 400; /// this is the spacing between scrolling tweet objects
@@ -287,6 +411,8 @@
               
               console.log("Can't reset tweets: " + e);
           }
+          /// show the loading function
+          showLoader();
           
           // Start a live feed loading, results will be available in a global
           // ArrayList called tweets.  loadTweets() is a custom method added
@@ -353,7 +479,7 @@
           totalNumTweets =  tweets.size();
           tweets.clear(); /// why do we want to clear the tweets after this?
 		  hasTweets = true;
-         
+          hideLoader();
 
           }
           
@@ -361,6 +487,13 @@
 
     void draw() {
         background(bgColor);
+        // CHECK FOR BG IMAGE
+        /// DO THE BGROUND IMAGE
+        if(showBGImage){
+            
+            image(bgroundImage, 0, 0);
+        }
+        
          // CHECK FOR TWITTER DATA
         // if none, spawn the text object
         if (!hasTweets) {
@@ -393,7 +526,16 @@
           
       }
       
-      /// change colors
+      void showLoader(){
+          
+          window.showLoader();
+      }
+      void hideLoader(){
+          
+          window.hideLoader();
+      }
+      
+      /// change background colors
 
       void changeBGColor(String theColor){
           if(interfaceShowing){
@@ -403,7 +545,32 @@
           }
           
       }
+      //// BACKGROUND IMAGE FUNCTIONS /////
+      void setBackgroundImage(String imagePath){
+          console.log("Processing has image: " + imagePath);
+          
+          String bgPath = imagePath;
+          // Load image from the ipad
+          try{
+              bgroundImage = new PImage;
+              bgroundImage = loadImage(bgPath);
+              showBGImage = true;
+          } catch (Exception e){
+              
+              console.log("CAN'T LOAD IMAGE: " + e);
+          }
+          
+          
+      }
+      void deleteBackgroundImage(){
+          
+          showBGImage = false;
+          console.log("DELETE BG IMAGE: " + showBGImage);
+          
+          
+      }
 
+      //// change font color
       void changeFontColor(int theColor){
           if(interfaceShowing){
               string dColor = theColor.substring(1);
@@ -839,38 +1006,59 @@ class Timer {
       </canvas>
 
         <div id="interface">
-        <div id="header_label"><a href="#"><img src="images/header.png" width="253" height="33"></a></div>
-        <div id="closeButton"><a href="#" onClick="hideOverlay(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a></div>
-        <div id="searchterm"><img src="images/butt_search_term.png" width="175" height="23"><input type="search" name="twittersearch" size="73" onsearch="changeSearch(this.value)" /></div>
+            <!-- HEADER CONTAINER !-->
+            <div id="header_container">
+            
+                <ul id="header_list">
+                <li><a href="#"><img src="images/header.png" width="253" height="33"></a>
+                </li>
+                <li><img src="images/butt_search_term.png" width="175" height="23"><input type="search" name="twittersearch" size="73" onsearch="changeSearch(this.value)" />
+                </li>
+                <li>
+                    <div id="readout-style">Tweets Found:</div>
+                    <div id="loading-style"><img src="images/loading_anim.gif" width="35" height="35"></div>
+                </li>
+                <li style=" float:right"><a href="#" onClick="hideOverlay(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a>
+                </li>
+                </ul>
+                
+            </div>
+            
+            <!-- CONFIG CONTAINER !-->
+            <div id="config_container">
             <ul id="config_list">
                <!-- COLOR PICKER CODE !-->   
                <li>
-               <div id="colorpicker_container">
+
                <div id="color_picker" style="color: red; font-size: 1.4em"></div>
-               <form action="" style="width: 500px;">
+               <form action="">
                    <div id="picker" style="float: left;"></div>
                    <div class="form-item" id="form-item">
-                       <img src="images/butt_fontocolor.png" width="121" height="23"><br>
+                       <div class="label-style">Change Color:</div>
+                       <!-- <img src="images/butt_fontocolor.png" width="121" height="23"><br> !-->
                        <input type="text" id="color1" name="color1" class="colorwell" value="#123456" readonly="true"/>
                    </div>
                    <br><br>
                    <div class="form-item" id="form-item">
-                       <img src="images/butt_bgcolor.png" width="213" height="23" ><br>
+                       <!-- <img src="images/butt_bgcolor.png" width="213" height="23" ><br> !-->
                        <input type="text" id="color2" name="color2" class="colorwell" value="#123456" readonly="true"/>
                    </div>
                </form>
-              </div>
+
             <!-- load picture code !-->
+                   
             <li>
-                <input type="text" class="simpleButton" value="Load Image" readonly="true"/><br>
-                <input type="text" class="simpleButton" value="Delete Image" readonly="true"/>
+                <div class="label-style">Change Background Image:</div>
+                <input type="text" class="simpleButton" value="Load Image" readonly="true" onClick="getPhoto(pictureSource.PHOTOLIBRARY); return false;"/><br><br>
+                <input type="text" class="simpleButton" value="Delete Image" readonly="true"onClick="deletePhoto(); return false;"/>
                 
             </li>
                    
             <!-- misc config code !-->
             <li>
-            <div id="speedslider"><img src="images/butt_speed.png" width="97" height="23"><input type="range" class="speedslider" min="0" max="20" value="5" step="1" onchange="showValue(this.value)"/></div><br>
-            <div id="animation_type"><img src="images/animation.png" width="151" height="23">
+            <div class="label-style">Speed:</div>
+            <input type="range" class="speedslider" min="0" max="20" value="5" step="1" onchange="showValue(this.value)"/><<br>
+            <div class="label-style">Animation Type:</div>
                 <select id="animation" onchange="changeAnim(this.value)">
                     <optgroup selected="selected" label="Animation Type" value="fade">Fade</option>
                         <option value ="fade">Fade</option>
@@ -878,10 +1066,13 @@ class Timer {
                         <option value ="wipe" >Wipe</option>
                     </optgroup>
                 </select>
-                </div><br>
-            <div id="showPic"><img src="images/butt_showpic.png" width="121" height="23"><input type="checkbox" onchange="togglePic(this.value)"/></div>
+                <br>
+            <div class="label-style">Show Pic:</div>
+            <input type="checkbox" class="show-pic-style" onchange="togglePic(this.value)"/>
             </li>
-            <!-- end interface !-->
+
             </ul>
+            </div>
+            <!-- end interface !-->
         </div>
 </html>
