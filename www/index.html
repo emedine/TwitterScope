@@ -12,18 +12,31 @@
 	<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />		
 	-->
 	<!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
+    <!-- <link rel="stylesheet"  href="css/jquery.mobile-1.2.0.min.css" /> !-->
+        
     <link href="css/style.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="css/farbtastic.css" type="text/css" />
-        
+            
     <script type="text/javascript" charset="utf-8" src="cordova-1.7.0.js"></script>
     <script src="js/processing.js" type="text/javascript"></script>
-  	<script src="js/processing-twitter.js" type="text/javascript"></script>
-    <!--<script type="text/javascript" src="js/colorpicker.js"></script>
-    <script type="text/javascript" src="js/jscolor/jscolor.js"></script> !-->
-        
+    <script src="js/processing-twitter.js" type="text/javascript"></script>
+
+
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/farbtastic.js"></script>
-
+        
+    <!-- jquery mobile  !-->
+    <script type="text/javascript" src="js/jquery.mobile.custom.js"></script> 
+    <script type="text/javascript" src="js/jquery.mobile.custom.min.js"></script>
+        
+    <!-- jquery mobile css !-->
+    <link href="css/jquery.mobile.custom.css" rel="stylesheet" type="text/css">
+    <link href="css/jquery.mobile.custom.min.css" rel="stylesheet" type="text/css">
+    <link href="css/jquery.mobile.custom.structure.css" rel="stylesheet" type="text/css">
+    <link href="css/jquery.mobile.custom.structure.min.css" rel="stylesheet" type="text/css">
+    <link href="css/jquery.mobile.custom.theme.css" rel="stylesheet" type="text/css">
+    <link href="css/jquery.mobile.custom.theme.min.css" rel="stylesheet" type="text/css">
+                                
         
     <script type="text/javascript">
 	// If you want to prevent dragging, uncomment this section
@@ -163,6 +176,20 @@
     	processingInstance.togglePic(toggleValue);
 
     }
+    /// SHOW AND HIDE THE HELP /////////////
+    function showHelp(){
+        theHelp = document.getElementById("help_panel");
+        theHelp.style.display = "block";
+            
+            
+    }
+    function hideHelp(){
+        theHelp = document.getElementById("help_panel");
+        theHelp.style.display = "none";
+            
+            
+    }
+        
     /// change background color
     function changeBGColor(hexColor){
         // console.log("INIT BG COLOR CHANGE:  " + hexColor);
@@ -1033,9 +1060,14 @@ class Timer {
        <!-- TOP NAV !-->
       <div id="nav-top">
           <ul id="nav-top-list">
-             <li>HELP</li>
-             <li>SAVE</li>
-             <li>HIDE</li>
+              <!-- <li><a href="#" onClick="showHelp(); return false;">HELP</a></li> !-->
+             <li id="nav-butt-l"></li>
+             <li id="nav-butt"><a href="help.html" data-role="button" data-rel="dialog" data-transition="slide">HELP</a></li>
+             <li id="nav-butt-mid"></li>
+             <li id="nav-butt">SAVE</li>
+             <li id="nav-butt-mid"></li>
+             <li id="nav-butt"><a href="#" onClick="hideOverlay(); return false;">HIDE</a></li>
+             <li id="nav-butt-r"></li>
           </ul>
       </div>
         <div id="interface">
@@ -1043,7 +1075,7 @@ class Timer {
             <div id="header_container">
             
                 <ul id="header_list">
-                <li><a href="#"><img src="images/header.png" width="253" height="33"></a>
+                <li><a href="#"><img src="images/header.png" width="297" height="73"></a>
                 </li>
                 <li>
                     <div id="label-style">Search Term:
@@ -1053,7 +1085,7 @@ class Timer {
                     <div id="readout-style">Tweets Found:
                     <input type="text" id="num-tweet-readout" name="num-tweet-readout" width="5" readonly="true"  value="" />
                     </div>
-                    <div id="loading-style"><img src="images/loading_anim.gif" width="35" height="35"></div>
+                    <div id="loading-style"><img src="images/ajax-loader.gif" width="35" height="35"></div>
                 </li>
                 <li style=" float:right"><a href="#" onClick="hideOverlay(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a>
                 </li>
@@ -1114,6 +1146,10 @@ class Timer {
             </div>
             <!-- end interface !-->
         </div>
-      <div id="help-window">
-        </div>
+      <!-- HELP SECTION !-->
+      <div id="help_panel" style="display:none;">
+          <div id="help_label"><a href="#"><img src="images/header_help.png" width="108" height="33"></a></div>
+          <div id="help_closeButton"><a href="#" onClick="hideHelp(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a></div>
+          
+      </div>
 </html>

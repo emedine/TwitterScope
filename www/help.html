@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title></title>
+  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+	<meta charset="utf-8">
+
+
+	<!-- iPad/iPhone specific css below, add after your main css >
+	<link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />		
+	<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />		
+	-->
+	<!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
+    <link href="css/style.css" rel="stylesheet" type="text/css">    
+    <script type="text/javascript" charset="utf-8" src="cordova-1.7.0.js"></script>
+
+        <!-- jquery mobile  !-->
+        <script type="text/javascript" src="js/jquery.mobile.custom.js"></script>
+        <script type="text/javascript" src="js/jquery.mobile.custom.min.js"></script>
+        
+        <!-- jquery mobile css !-->
+        <link href="css/jquery.mobile.custom.css" rel="stylesheet" type="text/css">
+            <link href="css/jquery.mobile.custom.min.css" rel="stylesheet" type="text/css">
+                <link href="css/jquery.mobile.custom.structure.css" rel="stylesheet" type="text/css">
+                    <link href="css/jquery.mobile.custom.structure.min.css" rel="stylesheet" type="text/css">
+                        <link href="css/jquery.mobile.custom.theme.css" rel="stylesheet" type="text/css">
+                            <link href="css/jquery.mobile.custom.theme.min.css" rel="stylesheet" type="text/css">
+        
+        
+  </head>
+  <body>
+      <div id="close-button">
+          <a href="#" data-icon="delete" data-rel="back" data-iconpos="notext" class="ui-btn-left ui-btn ui-btn-icon-notext ui-btn-corner-all ui-shadow ui-btn-active ui-btn-up-e" title="Close" data-theme="e" data-transition="slide" data-direction="reverse">Close</a>
+      </div>
+    <div id="help_textbox">
+        CineTweet is an app that lets you display your tweets for presentation purposes. You can change background colors and font color to match your branding style guides, and even upload a logo or background image. 
+
+The default search is “whatevs”, but you can change your search parameters by typing a keyword into the “search” text field and clicking “GO!”. CineTweet will search the TwitterStream for all tweets containing your keyword. If no tweets are found, change your terms and try again.
+
+You can upload a logo or background image by clicking the “upload logo” button and CineTweet will automatically position the image in the center of the display. Keep in mind that some images will work better than others-- recommended image types are .PNG, .JPG, and .GIF. Recommended image dimensons are less than 1024px wide and 728px tall. Recommended file size is less than 300k, so taking a picture with your mobile device may produce an image that is too big for CineTweet to position correctly. In addition, if your image does not have a transparent background (JPG images fall into this category) it may not match the background color you have chosen.
+
+The “save” button allows you to save your current configurations.
+</div>
+      
+  </body>
+</html>
