@@ -12,6 +12,9 @@
 
   function getScript(success) {
     var script = document.createElement('script');
+ 
+ 
+ //// DON"T FORGET TO MAKE THIS LOCAL! ////
     script.src = "http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js";
     var head=document.getElementsByTagName('head')[0],
         done=false;

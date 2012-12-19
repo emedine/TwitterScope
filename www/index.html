@@ -48,6 +48,11 @@
 	function onBodyLoad()
 	{		
 		document.addEventListener("deviceready", onDeviceReady, false);
+        //// INIT STARTUP CONFIGURATIONS
+        var theSelectedButton = document.getElementById("color2");
+        // theSelectedButton.className += 'colorwell-selected';
+        theSelectedButton.style.border='5px solid #FFFFFF';
+       
 	}
         
     // turn off app when the back key is down
@@ -65,9 +70,10 @@
        
 	}
     /// INTERFACE FUNCTIONS
-    var theOverlay;
-    var theLoader;
-    var theReadout;
+    var theOverlay; /// help overlay
+    var theLoader; // loader object
+    var theReadout; // tweet readout object
+    var readoutNums; // numbers in the readout
     // show and hide
     // this is called from the canvas
     function showOverlay(theID){
@@ -103,6 +109,14 @@
         theReadout = document.getElementById("readout-style");
         theReadout.style.display = "block";
 
+    }
+    ///// update tweet readout
+        
+    function updateTweetReadout(numTweets){
+        var readoutNums = document.getElementById("num-tweet-readout");
+        readoutNums.value = numTweets;
+   
+            
     }
     ///////// DEVICE FUNCTIONS ////////
 
@@ -261,6 +275,7 @@
             
             
         }
+
     
     </script>
         
@@ -273,8 +288,9 @@
                         var p = $('#picker');
                         var selected;
                         $('.colorwell')
-                        .each(function () { f.linkTo(this); $(this).css('opacity', 0.75); })
+                        .each(function () { f.linkTo(this); $(this).css('opacity', 1); })
                         .focus(function() {
+                               /// handle button highlights
                                 if (selected) {
                                      $(selected).css('opacity', 1).removeClass('colorwell-selected');
                                      }
@@ -374,9 +390,6 @@
       // XXX: jbuck: "just subtract 10"
 	  size(1024, 768);
         
-      // hash map that holds our tweets and images
-      uniqueTweets = new HashMap();
-        
       colorMode(RGB, 100);
       /// size(window.innerWidth, window.innerHeight-10);
       background(bgColor);
@@ -394,13 +407,15 @@
           // zero out everything
           searchTerm = tSearch;
           try{
+              hasTweets = false;
+
               // tweets.clear();
               curTextID = 0;
               // hash map that holds our tweet objects and images
               uniqueTweets = new HashMap();
               // text object array that holds all the text objects
               
-              TextObjectArray =  new ArrayList();
+              TextObjectArray = new ArrayList();
               // set text sizes, pre-populate the array
               /// I don't think we need this anymore
               TextSizes = new int[100];
@@ -466,11 +481,13 @@
               /// space the objects with v spacing + the line height
 
               theTextObject.theY = ((i*tBoxSpace) + prevBoxH) - tBoxSpace;
-              console.log("PREV BOX HEIGHT = " + prevBoxH);
+              // console.log("PREV BOX HEIGHT = " + prevBoxH);
               prevBoxH = theTextObject.textBoxH;
               totalBoxH += prevBoxH;
               vertScrollHeight = (tweets.size()*tBoxSpace);//  + totalBoxH;
-
+              
+                  
+              updateTweetReadout(i + " : " + tweets.size());
               // theTextObject.theY = (i * 200)-200; /// start spawning above 0 so there's no gap
           }
           /// get the total height of all the tweets for scrolling positioning
@@ -521,9 +538,7 @@
           interfaceShowing = true; /// 
       }
       void overlayOff(){
-
           interfaceShowing = false;
-          
       }
       
       void showLoader(){
@@ -533,6 +548,13 @@
       void hideLoader(){
           
           window.hideLoader();
+      }
+      
+      /// update tweet readout
+      void updateTweetReadout(int numTweets){
+          
+          
+          window.updateTweetReadout(numTweets);
       }
       
       /// change background colors
@@ -620,7 +642,6 @@
 		// animationType = tType;
         switch(animationType) {
   		case 'fade':
-            // reSetTextObjectFade();
     		setTextObjectFade();
     		break;
   		case 'scroll': 
@@ -638,7 +659,6 @@
 	public void setTextObjectFade(){
  		for (int i = 0; i < TextObjectArray.size(); i++){
             try{
-                
                 // update text object
                 // if it hasn't faded in and out,
                 // init fade in toggle
@@ -647,8 +667,9 @@
 					// console.log("FADING: " + curTextID);
 
 					// init fade
-					if(!dTextObj.hasFaded){
+					if(!dTextObj.isFading){
 						dTextObj.fadeIn = true;
+                        dTextObj.isFading = true;
 					}
                 	dTextObj.doFade();
 				} 
@@ -671,7 +692,7 @@
                   // if it hasn't faded in and out,
                   // init fade in toggle
                   TextObject dTextObj = TextObjectArray.get(i);
-                  dTextObj.hasFaded = true;
+                  dTextObj.isFading = false;
                   dTextObj.fadeIn = false;
                   dTextObj.fadeHold = false;
                   dTextObj.fadeOut = false;
@@ -716,6 +737,13 @@
       
       // info window
       
+    //// FADE TIMER //////
+      function fadeTimer(){
+          
+          
+          
+      }
+      
     //// TEXT OBJECT /////////
       // /*
       class TextObject {
@@ -729,7 +757,7 @@
           int tSize= 36; // text size
           // int tSpacing = 60; // single line spacing
           int tId; // id of the tweet
-		  int fadeLevel = 255;
+		  int fadeLevel = 0;
           color fadeColor = (0,0,0,fadeLevel);
 
 		  // text box sizes
@@ -751,7 +779,7 @@
 		  boolean fadeIn = false; /// toggle for initial fade in
 		  boolean fadeHold = false;      
 		  boolean fadeOut = false;
-		  boolean hasFaded = false;
+		  boolean isFading = false;
      
           void initText(String theTweet, String theName, String theImagePath, String theDate, int theSize, int theID){
               tId = theID;
@@ -806,12 +834,14 @@
 			/// set position
               // update fade speed
               // map(value, start1, stop1, start2, stop2)
-              fadeSpeed = map(tAnimSpeed, 0, 20, 20000, 500);
+              fadeSpeed = map(tAnimSpeed, 0, 20, 20000, 250);
               
 			 if(fadeIn){ //// fading in
-				fadeLevel -=tAnimSpeed;
-				if(fadeLevel < 0){
-					hasFaded = true;
+				fadeLevel +=tAnimSpeed;
+                 // isFading = true;
+                 /// if faded all the way in,
+                 // turn off fadein and start timer
+				if(fadeLevel > 255){
 					fadeIn = false;
 					fadeHold = true;
 					fadeOut = false;
@@ -825,7 +855,7 @@
 			} 
 			if (fadeHold){  /// fadeHold
 					/// check hold timer status
-					/// if it's run out, fade out
+					/// if it's run out, start fade out
  					if (timer.isFinished()) {
 						fadeIn = false;
 						fadeHold = false;
@@ -836,8 +866,8 @@
 
 			}
 			if (fadeOut){ //// fade out
-				fadeLevel +=tAnimSpeed;
-				if(fadeLevel >=255){
+				fadeLevel -=tAnimSpeed;
+				if(fadeLevel <=0){
 					// console.log("DONE FADING OUT");
 					fadeIn = true;
 					fadeHold = false;
@@ -853,7 +883,7 @@
 						curTextID = 0;
 						
 					}
-					hasFaded = true;
+					isFading = false;
 				}
 
 
@@ -861,7 +891,7 @@
               
               // do the "from" name
 			  //// draw the text box
-              fill(tFontColor);
+              fill(tFontColor, fadeLevel);
  			  textAlign(CENTER);
               /// "from" text
               string headerText = tweetName + "   ..." + tweetTime;
@@ -891,11 +921,6 @@
 			  textFont(BasicFont,tSize);
 			  text(tweetText, 45, 300 + lineHeight, textBoxW, textBoxH);
               textWidth(1024);
-              
-              /// cover it up to fake a fade
-              fadeColor = color(bgColor,fadeLevel);
-              fill(fadeColor);
-              rect(0,0,tWidth, tHeight);
               
 
               
@@ -1004,7 +1029,15 @@ class Timer {
       <canvas id="tweets">
           <p>Please upgrade your browser to something newer, like <a href="http://chrome.google.com" target="_blank">Google Chrome</a></p>
       </canvas>
-
+      
+       <!-- TOP NAV !-->
+      <div id="nav-top">
+          <ul id="nav-top-list">
+             <li>HELP</li>
+             <li>SAVE</li>
+             <li>HIDE</li>
+          </ul>
+      </div>
         <div id="interface">
             <!-- HEADER CONTAINER !-->
             <div id="header_container">
@@ -1012,10 +1045,14 @@ class Timer {
                 <ul id="header_list">
                 <li><a href="#"><img src="images/header.png" width="253" height="33"></a>
                 </li>
-                <li><img src="images/butt_search_term.png" width="175" height="23"><input type="search" name="twittersearch" size="73" onsearch="changeSearch(this.value)" />
+                <li>
+                    <div id="label-style">Search Term:
+                    <input type="search" id="search-box" name="twittersearch" size="20" onsearch="changeSearch(this.value)" /></div>
                 </li>
                 <li>
-                    <div id="readout-style">Tweets Found:</div>
+                    <div id="readout-style">Tweets Found:
+                    <input type="text" id="num-tweet-readout" name="num-tweet-readout" width="5" readonly="true"  value="" />
+                    </div>
                     <div id="loading-style"><img src="images/loading_anim.gif" width="35" height="35"></div>
                 </li>
                 <li style=" float:right"><a href="#" onClick="hideOverlay(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a>
@@ -1034,12 +1071,13 @@ class Timer {
                <form action="">
                    <div id="picker" style="float: left;"></div>
                    <div class="form-item" id="form-item">
-                       <div class="label-style">Change Color:</div>
+                       <div id="label-style">Font Color:</div>
                        <!-- <img src="images/butt_fontocolor.png" width="121" height="23"><br> !-->
-                       <input type="text" id="color1" name="color1" class="colorwell" value="#123456" readonly="true"/>
+                       <input type="text" id="color1" name="color1" class="colorwell" value="#FFFFFF" readonly="true"/>
                    </div>
-                   <br><br>
+                   <br>
                    <div class="form-item" id="form-item">
+                        <div id="label-style">Background Color:</div>
                        <!-- <img src="images/butt_bgcolor.png" width="213" height="23" ><br> !-->
                        <input type="text" id="color2" name="color2" class="colorwell" value="#123456" readonly="true"/>
                    </div>
@@ -1048,17 +1086,18 @@ class Timer {
             <!-- load picture code !-->
                    
             <li>
-                <div class="label-style">Change Background Image:</div>
-                <input type="text" class="simpleButton" value="Load Image" readonly="true" onClick="getPhoto(pictureSource.PHOTOLIBRARY); return false;"/><br><br>
+                <div id="label-style">Background Image:</div>
+                <input type="text" class="simpleButton" value="Load Image" readonly="true" onClick="getPhoto(pictureSource.PHOTOLIBRARY); return false;"/>
+                <br><br><br>
                 <input type="text" class="simpleButton" value="Delete Image" readonly="true"onClick="deletePhoto(); return false;"/>
                 
             </li>
                    
             <!-- misc config code !-->
             <li>
-            <div class="label-style">Speed:</div>
-            <input type="range" class="speedslider" min="0" max="20" value="5" step="1" onchange="showValue(this.value)"/><<br>
-            <div class="label-style">Animation Type:</div>
+            <div id="label-style">Speed:</div>
+            <input type="range" class="speedslider" min="0" max="20" value="5" step="1" onchange="showValue(this.value)"/><br>
+            <div id="label-style">Animation Type:</div>
                 <select id="animation" onchange="changeAnim(this.value)">
                     <optgroup selected="selected" label="Animation Type" value="fade">Fade</option>
                         <option value ="fade">Fade</option>
@@ -1067,12 +1106,14 @@ class Timer {
                     </optgroup>
                 </select>
                 <br>
-            <div class="label-style">Show Pic:</div>
-            <input type="checkbox" class="show-pic-style" onchange="togglePic(this.value)"/>
+            <div id="label-style">Show Pic:</div>
+            <input type="checkbox" class="show-pic-style" onchange="togglePic(this.value)" checked="checked"/>
             </li>
 
             </ul>
             </div>
             <!-- end interface !-->
+        </div>
+      <div id="help-window">
         </div>
 </html>

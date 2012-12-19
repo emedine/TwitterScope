@@ -29,13 +29,12 @@ footer, header, hgroup, menu, nav, section {
 blockquote, q { quotes: none; }
 blockquote:before, blockquote:after,
 q:before, q:after { content: ''; content: none; }
-ins { background-color: #ff9; color: #000; text-decoration: none; }
-mark { background-color: #ff9; color: #000; font-style: italic; font-weight: bold; }
+ins { background-color: #ff9; text-decoration: none; }
+mark { background-color: #ff9; font-style: italic; font-weight: bold; }
 del { text-decoration: line-through; }
 abbr[title], dfn[title] { border-bottom: 1px dotted; cursor: help; }
 table { border-collapse: collapse; border-spacing: 0; }
 hr { display: block; height: 1px; border: 0; border-top: 1px solid #ccc; margin: 1em 0; padding: 0; }
-input, select { vertical-align: top; }
 
 body { 
     font-family: Helvetica, Arial, sans-serif; 
@@ -44,7 +43,6 @@ body {
     padding: 0;
     background: #cccccc;
 }
-select, input, textarea, button { font:99% sans-serif; }
 pre, code, kbd, samp { font-family: monospace, sans-serif; }
 
 a:hover, a:active { outline: none; }
@@ -61,22 +59,12 @@ sub { bottom: -0.25em; }
 
 pre { white-space: pre; white-space: pre-wrap; word-wrap: break-word; padding: 15px; }
 textarea { overflow: auto; }
-.ie6 legend, .ie7 legend { margin-left: -7px; }
-input[type="radio"] { vertical-align: text-bottom; }
-label, input[type="button"], input[type="submit"], input[type="image"], button { cursor: pointer; }
-button, input, select, textarea { margin: 0; }
-input:valid, textarea:valid   {  }
-input:invalid, textarea:invalid { border-radius: 1px; -moz-box-shadow: 0px 0px 5px red; -webkit-box-shadow: 0px 0px 5px red; box-shadow: 0px 0px 5px red; }
 .no-boxshadow input:invalid, .no-boxshadow textarea:invalid { background-color: #f0dddd; }
 
-::-moz-selection{ background: #FF5E99; color:#fff; text-shadow: none; }
-::selection { background:#FF5E99; color:#fff; text-shadow: none; }
-a:link { -webkit-tap-highlight-color: #FF5E99; }
 
 button {  width: auto; overflow: visible; }
 .ie7 img { -ms-interpolation-mode: bicubic; }
 
-body, select, input, textarea {  color: #000000; }
 h1, h2, h3, h4, h5, h6 { font-weight: bold; }
 a, a:active, a:visited { color: #cccccc; }
 a:hover { color: #ffffff; }
@@ -130,6 +118,29 @@ a { text-decoration: none; }
 #canvas {
 
 }
+
+/* TOP NAV STYLES */
+#nav-top{
+    width:1024px;
+	margin: 0 auto;
+	min-height:100px;
+    position:absolute;
+    top:0px;
+    left:0px;
+    background: url('../images/top_nav_bground.jpg') no-repeat;
+    
+}
+#nav-top-list{
+
+    margin-left:450px;
+}
+ul#nav-top-list li{
+    list-style-type:none;
+    float:left;
+    text-align:left;
+    margin-right:25px;
+    color:#FFFFFF;
+}
 /* INTERFACE STYLES */
 
 #interface{
@@ -161,10 +172,8 @@ ul#header_list li{
     width:1024px;
     
 }
-
 #config_list{
 
-    
 }
 
 ul#config_list li{
@@ -181,10 +190,11 @@ ul#config_list li{
 
 /* INPUT STYLES */
 
-.label-style{
+#label-style{
+    color:#FFFFFF;
     font-family: Helvetica, Arial, sans-serif;
     font-size:18px;
-    color:#FFFFFF;
+
     
     
 }
@@ -192,7 +202,7 @@ ul#config_list li{
     font-family: Helvetica, Arial, sans-serif;
     font-size:18px;
     color:#FFFFFF;
-    display:block;
+    display:inline;
     
 }
 #loading-style{
@@ -210,6 +220,7 @@ ul#config_list li{
     font-size: 24px;
 
 }
+
 .colorwell {
     -webkit-border-radius: 25px; -moz-border-radius: 25px; border-radius: 25px;
     border: 5px solid #000000;
@@ -220,7 +231,13 @@ ul#config_list li{
     cursor: pointer;
 }
 body .colorwell-selected {
+    -webkit-border-radius: 25px; -moz-border-radius: 25px; border-radius: 25px;
     border: 5px solid #FFFFFF;
+    width: 150px;
+    height: 50px;
+    text-align: center;
+    font-size: 24px;
+    cursor: pointer;
     font-weight: bold;
 }
 
@@ -252,18 +269,30 @@ input [type="checkbox"]{
 
     
 }
-input [type='text']{
+#num-tweet-readout{
+    -webkit-appearance:none;
+    -webkit-border-radius:5px;
+    height:20px;
+    width:50px;
+    
+    
+}
+#search-box{
+    -webkit-appearance:none;
+    -webkit-border-radius:5px;
     height:20px;
     width:100px;
+    outline: none;
     
+    
+    
+}
+input [type='text']{
+
 }
 input[type='search'] {
 
-	text-align: left;
-	cursor: pointer;
-	display: block;
-	width: 150px;
-  }
+}
 
 
 /* COLOR PICKER ITEM STYLES */
