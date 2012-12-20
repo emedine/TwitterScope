@@ -25,17 +25,15 @@
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/farbtastic.js"></script>
         
-    <!-- jquery mobile  !-->
-    <script type="text/javascript" src="js/jquery.mobile.custom.js"></script> 
-    <script type="text/javascript" src="js/jquery.mobile.custom.min.js"></script>
+    <!-- jquery mobile  !-->   
+    <script src="js/jquery.mobile-1.2.0.min.js"></script>
         
+    <!-- jquery touchswipe !-->
+    <script src="js/jquery.touchSwipe-1.2.5.js"></script>
+    
+
     <!-- jquery mobile css !-->
-    <link href="css/jquery.mobile.custom.css" rel="stylesheet" type="text/css">
-    <link href="css/jquery.mobile.custom.min.css" rel="stylesheet" type="text/css">
-    <link href="css/jquery.mobile.custom.structure.css" rel="stylesheet" type="text/css">
-    <link href="css/jquery.mobile.custom.structure.min.css" rel="stylesheet" type="text/css">
-    <link href="css/jquery.mobile.custom.theme.css" rel="stylesheet" type="text/css">
-    <link href="css/jquery.mobile.custom.theme.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet"  href="css/themes/default/jquery.mobile-1.2.0.css" />
                                 
         
     <script type="text/javascript">
@@ -64,8 +62,7 @@
         //// INIT STARTUP CONFIGURATIONS
         var theSelectedButton = document.getElementById("color2");
         // theSelectedButton.className += 'colorwell-selected';
-        theSelectedButton.style.border='5px solid #FFFFFF';
-       
+        
 	}
         
     // turn off app when the back key is down
@@ -79,28 +76,48 @@
 	for more details -jm */
 	function onDeviceReady()
 	{
-		
-       
-	}
+    }
     /// INTERFACE FUNCTIONS
     var theOverlay; /// help overlay
     var theLoader; // loader object
     var theReadout; // tweet readout object
     var readoutNums; // numbers in the readout
+    var topNav; /// top navigation
+    
+        
+    var configY = 500;
     // show and hide
     // this is called from the canvas
     function showOverlay(theID){
         theOverlay = document.getElementById("interface");
+        topNav = document.getElementById("nav-top");
         theOverlay.style.display = "block";
+        topNav.style.display = "block";
+        
+        $("#nav-top").animate({top: '0px'});
+        $("#interface").animate({top: '410px'});
+
 
     }
     // this is called from the interface
     function hideOverlay(){
+        console.log("SWIPING OVERLAY");
         if (!processingInstance) {
             processingInstance = Processing.getInstanceById('tweets');
         }
         theOverlay = document.getElementById("interface");
+        topNav = document.getElementById("nav-top");
+        /*
         theOverlay.style.display = "none";
+        topNav.style.display = "none";
+        */
+        /// do animation
+
+        $("#interface").animate({top: '768px'});
+        $("#nav-top").animate({top: '-100px'});
+
+        /// toggle the overlay flag so no interface
+        /// actions occour when clicking on canvas
         processingInstance.overlayOff();
     }
     
@@ -149,7 +166,7 @@
       }
     
     /// speed slider
-    function showValue(newValue){
+    function updateSpeed(newValue){
     	/// document.getElementById("range").innerHTML=newValue;
     	processingInstance = Processing.getInstanceById('tweets');
     	processingInstance.changeAnimSpeed(newValue);
@@ -163,8 +180,11 @@
     	
     }
     /// search function
-    function changeSearch(searchTerm){
+    function changeSearch(){
+
+        var searchBox = document.getElementById("search-box");
         console.log("CHANGE SEARCH: " + searchTerm);
+        var searchTerm = searchBox.value;
         processingInstance = Processing.getInstanceById('tweets');
     	processingInstance.initSearch(searchTerm);
       
@@ -349,8 +369,8 @@
       
       /// GLOBAL PROPERTIES
       int tWidth = 1024;  /// canvas width
-      int tHeight = 768;  /// canvas height
-      color bgColor = #000000;
+      int tHeight = 760;  /// canvas height
+      color bgColor = #121256;
       color tFontColor = #FFFFFF;
 	  int tAnimSpeed = 2;
       int fadeSpeed;
@@ -415,7 +435,7 @@
         
       searchTerm = "#coachella";
       // XXX: jbuck: "just subtract 10"
-	  size(1024, 768);
+	  size(1024, 760);
         
       colorMode(RGB, 100);
       /// size(window.innerWidth, window.innerHeight-10);
@@ -514,7 +534,7 @@
               vertScrollHeight = (tweets.size()*tBoxSpace);//  + totalBoxH;
               
                   
-              updateTweetReadout(i + " : " + tweets.size());
+              updateTweetReadout(tweets.size());
               // theTextObject.theY = (i * 200)-200; /// start spawning above 0 so there's no gap
           }
           /// get the total height of all the tweets for scrolling positioning
@@ -1060,35 +1080,64 @@ class Timer {
        <!-- TOP NAV !-->
       <div id="nav-top">
           <ul id="nav-top-list">
-              <!-- <li><a href="#" onClick="showHelp(); return false;">HELP</a></li> !-->
              <li id="nav-butt-l"></li>
-             <li id="nav-butt"><a href="help.html" data-role="button" data-rel="dialog" data-transition="slide">HELP</a></li>
+             <li id="nav-butt"><a href="help.html" data-rel="dialog" data-transition="slide" style="color:#FFFFFF; text-decoration:none; font-weight:normal;">HELP</a></li>
              <li id="nav-butt-mid"></li>
              <li id="nav-butt">SAVE</li>
              <li id="nav-butt-mid"></li>
-             <li id="nav-butt"><a href="#" onClick="hideOverlay(); return false;">HIDE</a></li>
+             <li id="nav-butt"><a href="#" onClick="hideOverlay(); return false;" style="color:#FFFFFF; text-decoration:none; font-weight:normal;">HIDE</a></li>
              <li id="nav-butt-r"></li>
           </ul>
       </div>
+      
+      <!-- INTERFACE and CONFIG !-->
         <div id="interface">
             <!-- HEADER CONTAINER !-->
             <div id="header_container">
-            
+                <script>
+                    
+                    $(function()
+                      {
+                      //Enable swiping...
+                      $("#close-button").swipe( {
+                                       //Generic swipe handler for all directions
+                                       swipe:function(event, direction, distance, duration, fingerCount) {
+
+                                            if(direction == "down"){
+                                             hideOverlay();
+                                            }
+                                       },
+                                       //Default is 75px, set to 0 for demo so any distance triggers swipe
+                                       threshold:0
+                                       });
+                      });
+                    
+                    
+                    </script>
                 <ul id="header_list">
-                <li><a href="#"><img src="images/header.png" width="297" height="73"></a>
+                <li style="width:297px"><a href="#"><img src="images/header.png" width="297" height="73"></a>
+                </li>
+                    <li  style="width:210px"><div id="close-button" style="width:220px; height:59px;"></div></li>
+
+                <li style="margin-right:5px;">
+                    <div id="label-style">Search Term:</div>
+                    <input type="text" id="search-box" name="twittersearch" size="20" onChange="changeSearch()" data-theme="a" style="width:140px;"/>
+                    <!-- activate search !-->
+                    
+                </li>
+                <li><br>
+                    <a href="#" data-role="button" onClick="changeSearch(); return false;" data-theme="a" style="width:70px;">GO!</a>
                 </li>
                 <li>
-                    <div id="label-style">Search Term:
-                    <input type="search" id="search-box" name="twittersearch" size="20" onsearch="changeSearch(this.value)" /></div>
-                </li>
-                <li>
-                    <div id="readout-style">Tweets Found:
-                    <input type="text" id="num-tweet-readout" name="num-tweet-readout" width="5" readonly="true"  value="" />
+                    <div id="readout-style">Tweets:
+                    <input type="text" id="num-tweet-readout" name="num-tweet-readout" width="5" readonly="true"  value="" data-theme="a" style="width:50px"/>
                     </div>
                     <div id="loading-style"><img src="images/ajax-loader.gif" width="35" height="35"></div>
                 </li>
-                <li style=" float:right"><a href="#" onClick="hideOverlay(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a>
+                <!-- 
+                <li style=" float:right" id="close-button"><a href="#" onClick="hideOverlay(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a>
                 </li>
+                 !-->
                 </ul>
                 
             </div>
@@ -1105,13 +1154,13 @@ class Timer {
                    <div class="form-item" id="form-item">
                        <div id="label-style">Font Color:</div>
                        <!-- <img src="images/butt_fontocolor.png" width="121" height="23"><br> !-->
-                       <input type="text" id="color1" name="color1" class="colorwell" value="#FFFFFF" readonly="true"/>
+                       <input type="text" id="color1" name="color1" class="colorwell" value="#FFFFFF" readonly="true" style="width:170px"/>
                    </div>
                    <br>
                    <div class="form-item" id="form-item">
                         <div id="label-style">Background Color:</div>
                        <!-- <img src="images/butt_bgcolor.png" width="213" height="23" ><br> !-->
-                       <input type="text" id="color2" name="color2" class="colorwell" value="#123456" readonly="true"/>
+                       <input type="text" id="color2" name="color2" class="colorwell" value="#121256" readonly="true" style="width:170px"/>
                    </div>
                </form>
 
@@ -1119,27 +1168,29 @@ class Timer {
                    
             <li>
                 <div id="label-style">Background Image:</div>
-                <input type="text" class="simpleButton" value="Load Image" readonly="true" onClick="getPhoto(pictureSource.PHOTOLIBRARY); return false;"/>
-                <br><br><br>
-                <input type="text" class="simpleButton" value="Delete Image" readonly="true"onClick="deletePhoto(); return false;"/>
+                 <a href="#" data-role="button" data-role="button" onClick="getPhoto(pictureSource.PHOTOLIBRARY); return false;" data-theme="a">Load Image</a>
+                <br><br>
+                 <a href="#" data-role="button" data-role="button" onClick="deletePhoto(); return false;" data-theme="a">Delete Image</a>
                 
             </li>
                    
             <!-- misc config code !-->
-            <li>
-            <div id="label-style">Speed:</div>
-            <input type="range" class="speedslider" min="0" max="20" value="5" step="1" onchange="showValue(this.value)"/><br>
-            <div id="label-style">Animation Type:</div>
-                <select id="animation" onchange="changeAnim(this.value)">
+            <li style="width:150px;">
+            <div id="label-style" style="margin-bottom:10px;">Speed:</div>
+                <input type="range" class="speedslider" min="0" max="20" value="5" step="1" onchange="updateSpeed(this.value)"  data-theme="a" style="display : none !important; margin-bottom:10px;"/><br>
+            <div id="label-style" style=" margin-bottom:10px;">Animation Type:</div>
+                <select id="animation" onchange="changeAnim(this.value)"  data-theme="a">
                     <optgroup selected="selected" label="Animation Type" value="fade">Fade</option>
                         <option value ="fade">Fade</option>
                         <option value ="scroll">Scroll</option>
                         <option value ="wipe" >Wipe</option>
                     </optgroup>
                 </select>
-                <br>
-            <div id="label-style">Show Pic:</div>
-            <input type="checkbox" class="show-pic-style" onchange="togglePic(this.value)" checked="checked"/>
+            <div id="label-style" style="margin-bottom:10px;">Show Pic:</div>
+            <select name="flip-1" id="flip-1" data-role="slider" onchange="togglePic(this.value)" data-theme="a">
+                <option value="off" >Off</option>
+                <option value="on" selected>On</option>
+            </select>
             </li>
 
             </ul>
