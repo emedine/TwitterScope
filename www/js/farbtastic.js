@@ -279,7 +279,7 @@ jQuery._farbtastic = function (container, callback) {
                 $(document).click(changeFontColor(this.value));
                           
             } else if(this.id == "color2"){
-                $(document).click(changeBGColor(this.value));
+                $(document).click(changeBackgroundColor(this.value));
                           
             }
 

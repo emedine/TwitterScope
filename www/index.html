@@ -12,16 +12,29 @@
 	<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />		
 	-->
 	<!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
-    <!-- <link rel="stylesheet"  href="css/jquery.mobile-1.2.0.min.css" /> !-->
-        
+    
+    <!-- styles !-->
     <link href="css/style.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="css/farbtastic.css" type="text/css" />
-            
+    
+    <!-- processing and cordova scripts !-->
     <script type="text/javascript" charset="utf-8" src="cordova-1.7.0.js"></script>
     <script src="js/processing.js" type="text/javascript"></script>
     <script src="js/processing-twitter.js" type="text/javascript"></script>
 
-
+    <!-- save functions !-->
+    <script type="text/javascript" src="js/Lawnchair.js"></script>
+    <script type="text/javascript" src="js/adaptors/LawnchairAdaptorHelpers.js"></script>
+    <script type="text/javascript" src="js/adaptors/DOMStorageAdaptor.js"></script>
+    <script type="text/javascript" src="js/adaptors/WebkitSQLiteAdaptor.js"></script>
+    <script type="text/javascript" src="js/adaptors/UserDataStorage.js"></script>
+    <script type="text/javascript" src="js/adaptors/html5-filesystem.js"></script>
+    <script type="text/javascript" src="js/adaptors/CookieAdaptor.js"></script>
+    <script type="text/javascript" src="js/adaptors/indexed-db.js"></script> 
+    <script type="text/javascript" src="js/adaptors/memory.js"></script>  
+    <script type="text/javascript" src="js/adaptors/gears-sqlite.js"></script>      
+    <script type="text/javascript" src="js/adaptors/dom.js"></script>      
+        
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/farbtastic.js"></script>
         
@@ -38,13 +51,13 @@
         
     <script type="text/javascript">
 	// If you want to prevent dragging, uncomment this section
-	/*
+	//*
 	function preventBehavior(e) 
 	{ 
       e.preventDefault(); 
     };
 	document.addEventListener("touchmove", preventBehavior, false);
-	*/
+	//*/
 	
 	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
 	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
@@ -62,7 +75,11 @@
         //// INIT STARTUP CONFIGURATIONS
         var theSelectedButton = document.getElementById("color2");
         // theSelectedButton.className += 'colorwell-selected';
-        
+        // theData = new Lawnchair("settings");
+        console.log("STARTING APP and INITILIZING DB");
+        theData = new Lawnchair({name:'settings'},function(e){
+                                console.log('storage open');
+                                });
 	}
         
     // turn off app when the back key is down
@@ -71,23 +88,36 @@
     }
         
 	/* When this function is called, Cordova has been initialized and is ready to roll */
-	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
-	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
-	for more details -jm */
+	
 	function onDeviceReady()
 	{
     }
-    /// INTERFACE FUNCTIONS
+    /// interface vars
     var theOverlay; /// help overlay
     var theLoader; // loader object
     var theReadout; // tweet readout object
     var readoutNums; // numbers in the readout
     var topNav; /// top navigation
     
-        
+    //// configuration vars
     var configY = 500;
-    // show and hide
-    // this is called from the canvas
+    var theData; // = new Lawnchair('settings'); // save object definition
+    // initial vars are null
+    var bgColorConfig = "null";
+    var fontColorConfig = "null";
+    var bgroundPathConfig = "null";
+    var animTypeConfig = "null";
+    var animSpeedConfig = "null";
+    var showPicConfig = "null";
+        
+        
+    /// processing vars
+    var processingInstance;
+        
+        
+    // INTERFACE FUNCTIONS /////////////
+        
+    // called from the canvas
     function showOverlay(theID){
         theOverlay = document.getElementById("interface");
         topNav = document.getElementById("nav-top");
@@ -99,7 +129,7 @@
 
 
     }
-    // this is called from the interface
+    // called from the interface
     function hideOverlay(){
         console.log("SWIPING OVERLAY");
         if (!processingInstance) {
@@ -140,7 +170,7 @@
         theReadout.style.display = "block";
 
     }
-    ///// update tweet readout
+    ///// update tweet number readout
         
     function updateTweetReadout(numTweets){
         var readoutNums = document.getElementById("num-tweet-readout");
@@ -148,6 +178,7 @@
    
             
     }
+    ////////////////////////////////////
     ///////// DEVICE FUNCTIONS ////////
 
     function onBackKeyDown(){
@@ -155,28 +186,28 @@
         navigator.device.exitApp();
     }
         
+    /// end device functions
+    /////////////////////////
+
+    ////////////////////////////////////
     /// PROCESSING CONTROL FUNCTIONS ////
-    var processingInstance;
-    function testCom() {
-      if (!processingInstance) {
-          processingInstance = Processing.getInstanceById('tweets');
-        }
-           
-           processingInstance.checkConsoleLog(); // stop animation, call noLoop()
-      }
-    
+
+       
     /// speed slider
     function updateSpeed(newValue){
     	/// document.getElementById("range").innerHTML=newValue;
     	processingInstance = Processing.getInstanceById('tweets');
     	processingInstance.changeAnimSpeed(newValue);
-    	
+        
+        animSpeedConfig = newValue;
     }
-    /// animation change drop down
+    /// animation change drop down list
     function changeAnim(animType){
     	processingInstance = Processing.getInstanceById('tweets');
     	processingInstance.changeAnimationType(animType);
     	console.log("ACTIVATING ANIM CHANGE" + animType);
+        
+        animTypeConfig = animType;
     	
     }
     /// search function
@@ -194,8 +225,12 @@
         console.log("TOGGLE PIC:  " + toggleValue);
         processingInstance = Processing.getInstanceById('tweets');
     	processingInstance.togglePic(toggleValue);
+        
+        showPicConfig = toggleValue;
 
     }
+    ////////////////////////////////////
+        
     /// SHOW AND HIDE THE HELP /////////////
     function showHelp(){
         theHelp = document.getElementById("help_panel");
@@ -210,14 +245,86 @@
             
     }
         
+    ////// SAVE SETTINGS ////////////////
+        
+
+        function doSave() {
+            // Retrieve the values from the form elements
+            // theUsername = document.getElementById('Username').value;
+            // thePassword = document.getElementById('Password').value;
+            // theAge = document.getElementById('Age').value;
+            
+            console.log("Saving: " + theData);
+            // Construct an object with them - the key value is the primary key for the record.
+            var theSettings = {key:"settings",
+                BGColor:bgColorConfig,
+                FontColor:fontColorConfig,
+                BgroundPic:bgroundPathConfig,
+                AnimType:animTypeConfig,
+                AnimSpeed:animSpeedConfig,
+                ShowPic:showPicConfig
+            };
+            
+            // Send them to the data store
+            theData.save(theSettings);
+            
+            // alert("Saved!");
+            console.log("Set object value: " + theSettings );
+        }
+        function deleteSave() {
+            theData.remove('settings');
+            console.log("Set object value to null.");
+
+            
+        }
+        function retrieveSave() {
+            // Call the get function, giving it the key we used to save with and a return function to populate the form with the values of the object
+            theData.get("settings",
+                        function(theSettings) {
+                        // Test we actually got a settings object
+                        if (theSettings) {
+                        // We did, so apply the data to the animation
+                        bgColorConfig = theSettings.BGColor;
+                        fontColorConfig = theSettings.FontColor;
+                        bgroundPathConfig = theSettings.BgroundPic;
+                        animTypeConfig = theSettings.AnimType;
+                        animSpeedConfig = theSettings.AnimSpeed;
+                        showPicConfig = theSettings.ShowPic;
+                        
+                        } else {
+                        console.log("No settings found!");
+                        }  
+                        } // function(theSettings)  
+                        );  
+            console.log("Recalled!");
+            //
+            /// save to the processing skech
+            processingInstance = Processing.getInstanceById('tweets');
+            processingInstance.setBackgroundImage(bgroundPathConfig);
+            processingInstance.changeBGColor(bgColorConfig);
+            processingInstance.changeFontColor(fontColorConfig);
+            processingInstance.changeAnimationType(animTypeConfig);
+            processingInstance.changeAnimSpeed(animSpeedConfig);
+            
+            console.log("UPDATED");
+        }
+        
+        //// END SAVE SETTINGS
+
+     
+    //// COLOR CHANGE FUNCTIONS ///////////
     /// change background color
-    function changeBGColor(hexColor){
+    function changeBackgroundColor(hexColor){
         // console.log("INIT BG COLOR CHANGE:  " + hexColor);
-         Processing.getInstanceById('tweets').changeBGColor(hexColor);    
+         Processing.getInstanceById('tweets').changeBGColor(hexColor);
+        
+         bgColorConfig = hexColor;
+    
     }
     function changeFontColor(hexColor){
         Processing.getInstanceById('tweets').changeFontColor(hexColor);
-            
+        
+        fontColorConfig = hexColor;
     }
         
     /// end PROCESSING CONTROL
@@ -282,6 +389,9 @@
             /// save to the processing skech
             processingInstance = Processing.getInstanceById('tweets');
             processingInstance.setBackgroundImage(imageURI);
+            
+            bgroundPathConfig = imageURI;
+            
         }
         
         // simple capture
@@ -322,8 +432,10 @@
             
             
         }
-
-    
+        
+        //////// END CAMERA CODE ////////////////
+        
+                    
     </script>
         
     <!-- COLOR PICKER CODE !-->
@@ -352,20 +464,12 @@
   </head>
   <body onLoad="onBodyLoad()">
   <!--
-  A port of http://blog.blprnt.com/blog/blprnt/updated-quick-tutorial-processing-twitter by Jer Thorp's
-  Processing Twitter demo. The twitter API is exposed to Processing.js via a JavaScript library. I
-  built this for a demo today, it's not really production quality, but could be refined to be used 
-  as such.  Click the sketch to have the word list reload from fresh tweets.
-  -->
+  CANVAS PROCESSING FUNCTIONS
+   -->
   <script id='sketch' type="application/processing">
-     
-      ArrayList<String> words = new ArrayList();
 
       // Global ArrayList of tweets is created in processing-twitter.js
-      // ArrayList<Tweet> tweets = new ArrayList();
-
-      // A class representing a Tweet.  Tweet objects are created in JS
-      // and automatically placed in the tweets ArrayList (created in JS)
+      ArrayList<String> words = new ArrayList();
       
       /// GLOBAL PROPERTIES
       int tWidth = 1024;  /// canvas width
@@ -1083,14 +1187,16 @@ class Timer {
              <li id="nav-butt-l"></li>
              <li id="nav-butt"><a href="help.html" data-rel="dialog" data-transition="slide" style="color:#FFFFFF; text-decoration:none; font-weight:normal;">HELP</a></li>
              <li id="nav-butt-mid"></li>
-             <li id="nav-butt">SAVE</li>
+             <li id="nav-butt"><a href="#" onClick="doSave(); return false;" style="color:#FFFFFF; text-decoration:none; font-weight:normal;">SAVE</a></li>
              <li id="nav-butt-mid"></li>
+              <li id="nav-butt"><a href="#" onClick="retrieveSave(); return false;" style="color:#FFFFFF; text-decoration:none; font-weight:normal;">APPLY SAVED SETTINGS</a></li>
+              <li id="nav-butt-mid"></li>
              <li id="nav-butt"><a href="#" onClick="hideOverlay(); return false;" style="color:#FFFFFF; text-decoration:none; font-weight:normal;">HIDE</a></li>
              <li id="nav-butt-r"></li>
           </ul>
       </div>
       
-      <!-- INTERFACE and CONFIG !-->
+      <!-- INTERFACE and CONFIG !  -->
         <div id="interface">
             <!-- HEADER CONTAINER !-->
             <div id="header_container">

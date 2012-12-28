@@ -116,7 +116,7 @@ a { text-decoration: none; }
 }
 
 #canvas {
-
+    -webkit-transform: translate3d(0,0,0); 
 }
 
 /* TOP NAV STYLES */
