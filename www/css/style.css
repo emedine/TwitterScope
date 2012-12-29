@@ -79,7 +79,8 @@ a:hover { color: #ffffff; }
 
 
 
-body {}
+body {
+   }
 p { margin-bottom: 1em; }
 a { text-decoration: none; }
 
@@ -98,8 +99,9 @@ a { text-decoration: none; }
 	margin: 0 auto;
 	padding-top: 0px;
 	text-align: center;
-	height:400px;
+	height:768px;
 	position:relative;
+    overflow: hidden;
 
 }
 
@@ -113,6 +115,7 @@ a { text-decoration: none; }
 	bottom: 0px;
 	margin: 0px;
 	border: 0px;
+
 }
 
 #canvas {
@@ -287,4 +290,3 @@ body .colorwell-selected {
 	margin-right:45px;
 	
 }
-

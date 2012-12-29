@@ -1,46 +1,47 @@
 <!DOCTYPE html>
 <html>
-  <head>
-  <title></title>
-  
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
-	<meta charset="utf-8">
-
-
-	<!-- iPad/iPhone specific css below, add after your main css >
-	<link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />		
-	<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />		
-	-->
-	<!-- If your application is targeting iOS BEFORE 4.0 you MUST put json2.js from http://www.JSON.org/json2.js into your www directory and include it here -->
-    <link href="css/style.css" rel="stylesheet" type="text/css">    
-    <script type="text/javascript" charset="utf-8" src="cordova-1.7.0.js"></script>
-
-        <!-- jquery mobile  !-->
-        <script type="text/javascript" src="js/jquery.mobile-1.2.0.min.js"></script>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style type="text/css">
-<!--
-body,td,th {
-	color: #FFF;
-	font-family: Arial, Helvetica, sans-serif;
-}
-body {
-	background-color: #000;
-}
--->
-</style></head>
-  <body>
-      <div id="close-button">
-          <a href="#" data-icon="delete" data-rel="back" data-iconpos="notext" class="ui-btn-left ui-btn ui-btn-icon-notext ui-btn-corner-all ui-shadow ui-btn-active ui-btn-up-e" title="Close" data-theme="e" data-transition="slide" data-direction="reverse">Close</a>
-      </div>
-    <div id="help_textbox">
-        CineTweet is an app that lets you display your tweets for presentation purposes. You can change background colors and font color to match your branding style guides, and even upload a logo or background image. 
-
-The default search is “whatevs”, but you can change your search parameters by typing a keyword into the “search” text field and clicking “GO!”. CineTweet will search the TwitterStream for all tweets containing your keyword. If no tweets are found, change your terms and try again.
-
-You can upload a logo or background image by clicking the “upload logo” button and CineTweet will automatically position the image in the center of the display. Keep in mind that some images will work better than others-- recommended image types are .PNG, .JPG, and .GIF. Recommended image dimensons are less than 1024px wide and 728px tall. Recommended file size is less than 300k, so taking a picture with your mobile device may produce an image that is too big for CineTweet to position correctly. In addition, if your image does not have a transparent background (JPG images fall into this category) it may not match the background color you have chosen.
-
-The “save” button allows you to save your current configurations.
-</div>
-      
-  </body>
+    
+    <head>
+        <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>HELP</title>
+                <script type="text/javascript" charset="utf-8" src="cordova-1.7.0.js"></script>
+                <script type="text/javascript" src="js/jquery.mobile-1.2.0.min.js"></script>
+                
+    </head>
+    
+    <body style="background-color:#000000";>
+        
+        <div data-role="page">
+            <!-- /header -->
+            <div data-role="header" style="height:70px;">
+              <a href="#" data-role="button" data-rel="back" data-icon="arrow-l" title="Close" data-theme="a" data-transition="slide" data-direction="reverse" >BACK</a><h1>HELP</h1>
+            </div>
+            <!-- /content -->
+            <div data-role="content" data-theme="a">
+                <div id="help_textbox">
+                    <p>CineTweet is an iPad app that lets you display your tweets for presentation purposes such as trade shows, corporate events, and music festivals. You can change background colors and font color to match your branding style guides, and even upload a logo or background image.
+                    </p>
+                    <br>
+                    <ul data-role="listview">
+                        <li>The default search is "whatevs", but you can change your search parameters by typing a keyword into the “search” text field and clicking “GO!”. CineTweet will search the TwitterStream for all tweets containing your keyword. If "Tweets" display counter reads zero, no tweets are found and you will need to change your search terms and try again.</li>
+                        <li>Use the "color wheel" to change your background and font colors-- click "Font Color" to change font color styles, and click "Background Color" to change the color of CineTweet's background.</li>
+                        <li>You can upload background image or logo by clicking the "upload logo" button and CineTweet will automatically position the image in the center of the display.
+                            <br><br>Recommended image dimensons are less than 1024px wide and 728px tall, saved as a .PNG, .JPG, or .GIF image format. Recommended file size is less than 300k, so taking a picture with your mobile device may produce an image that is too big for CineTweet to position correctly. In addition, if your image has a transparent background (such as a .GIF or a .PNG) it may not display correctly due to the way iOS re-compresses images on inport.</li>
+                        <li>The "Speed" slider changes the rate of the animation. It affects both the transition speed between the tweets, as well as the length of time the tweet is visible.</li>
+                        <li>The "Animation Type" button allows you to change the way CineTweet transitions between tweets-- currently it supports fade-in or scrolling display.</li>
+                        <li>The "Show Pic" toggle will change the visibility of the user's profile picture.</li>
+                        <li>The "SETTINGS" button opens a dialog box that allows you to save your current configurations.</li>
+                        <li>The "HIDE" button minimizes the configuration interface and hides the top navigation.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div data-role="footer">
+                <h4>Footer content</h4>
+            </div><!-- /footer -->
+            
+        </div><!-- /page -->
+        
+    </body>
 </html>

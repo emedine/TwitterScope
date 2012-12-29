@@ -70,7 +70,8 @@
 	*/
 	
 	function onBodyLoad()
-	{		
+	{
+        checkConnection();
 		document.addEventListener("deviceready", onDeviceReady, false);
         //// INIT STARTUP CONFIGURATIONS
         var theSelectedButton = document.getElementById("color2");
@@ -84,13 +85,37 @@
         
     // turn off app when the back key is down
     function onDeviceReady(){
+        
+        
+        checkConnection();
         document.addEventListener("backbutton",onBackKeyDown,true);
     }
         
 	/* When this function is called, Cordova has been initialized and is ready to roll */
 	
-	function onDeviceReady()
-	{
+
+    function checkConnection() {
+        console.log("Checking Network connection");
+        var networkState = navigator.network.connection.type;
+            
+        var states = {};
+        states[Connection.UNKNOWN]  = 'Unknown connection';
+        states[Connection.ETHERNET] = 'Ethernet connection';
+        states[Connection.WIFI]     = 'WiFi connection';
+        states[Connection.CELL_2G]  = 'Cell 2G connection';
+        states[Connection.CELL_3G]  = 'Cell 3G connection';
+        states[Connection.CELL_4G]  = 'Cell 4G connection';
+        states[Connection.NONE]     = 'No network connection';
+            
+        alert('Connection type: ' + states[networkState]);
+        /*
+        navigator.notification.alert(
+                                     states[networkState],  // message
+                                     alertDismissed,         // callback
+                                     'CONNECTION STATUS',            // title
+                                     'Close'                  // buttonName
+                                     );
+         */
     }
     /// interface vars
     var theOverlay; /// help overlay
@@ -463,6 +488,8 @@
         
   </head>
   <body onLoad="onBodyLoad()">
+
+  <div id="container">
   <!--
   CANVAS PROCESSING FUNCTIONS
    -->
@@ -478,6 +505,7 @@
       color tFontColor = #FFFFFF;
 	  int tAnimSpeed = 2;
       int fadeSpeed;
+      int pauseSpeed;
 	  int totalNumTweets;
       
       boolean hasTweets = false;
@@ -758,11 +786,7 @@
               int dAnim = int(newValue);
               tAnimSpeed = dAnim;
               /// reset everything and fade out with new speed
-              
-              //*
               TextObject dTextObj = TextObjectArray.get(curTextID);
-
-              // dTextObj.timer.stop();
               dTextObj.fadeIn = false;
               dTextObj.fadeHold = false;
               dTextObj.fadeOut = true;
@@ -790,7 +814,6 @@
 	  }
 
       void doTextObjectAnim(){
-		// animationType = tType;
         switch(animationType) {
   		case 'fade':
     		setTextObjectFade();
@@ -799,7 +822,7 @@
 			setTextObjectScroll();
     		break;
   		case 'wipe': 
-    		println("wipe");  // Prints "Bravo"
+    		println("wipe"); 
     		break;
  		 default:
     		break;
@@ -887,13 +910,7 @@
       // help window
       
       // info window
-      
-    //// FADE TIMER //////
-      function fadeTimer(){
-          
-          
-          
-      }
+
       
     //// TEXT OBJECT /////////
       // /*
@@ -974,8 +991,8 @@
              
               // numLines = Math.round((charWidth*numChars)/textBoxW);
               // console.log("NUM LINES: " + numLines);
-              console.log("String: " + theTweet);
-              console.log("lines: " + numLines + " char width: " + totalCharWidth);
+              // console.log("String: " + theTweet);
+              // console.log("lines: " + numLines + " char width: " + totalCharWidth);
               
               
           }
@@ -985,10 +1002,11 @@
 			/// set position
               // update fade speed
               // map(value, start1, stop1, start2, stop2)
-              fadeSpeed = map(tAnimSpeed, 0, 20, 20000, 250);
+              fadeSpeed = map(tAnimSpeed, 0, 20, 0, 50);
+              pauseSpeed = map(fadeSpeed, 0,50, 1000, 10);
               
 			 if(fadeIn){ //// fading in
-				fadeLevel +=tAnimSpeed;
+				fadeLevel +=fadeSpeed;
                  // isFading = true;
                  /// if faded all the way in,
                  // turn off fadein and start timer
@@ -997,7 +1015,8 @@
 					fadeHold = true;
 					fadeOut = false;
 					/// start hold timer
-					timer = new Timer(fadeSpeed);
+					timer = new Timer(pauseSpeed); // decrease the pause time
+                    console.log("TANIM: " + tAnimSpeed + "Fade speed:" + fadeSpeed + " Pause speed: " + pauseSpeed)
 					timer.start();
 					// console.log("DONE FADE IN, HOLDING" + fadeHold + " " + tId + " "  + fadeOut);
 				}
@@ -1013,11 +1032,9 @@
 						fadeOut = true;
 						// console.log("DONE HOLDING, FADING OUT");
 					}
-
-
 			}
 			if (fadeOut){ //// fade out
-				fadeLevel -=tAnimSpeed;
+				fadeLevel -=fadeSpeed;
 				if(fadeLevel <=0){
 					// console.log("DONE FADING OUT");
 					fadeIn = true;
@@ -1028,16 +1045,14 @@
 					/// then reset the fade id
                     
                     curTextID +=1;
-                    console.log("Cur Tweet: " + curTextID + " total: " + totalNumTweets);
+                    // console.log("Cur Tweet: " + curTextID + " total: " + totalNumTweets);
                     if(curTextID >= totalNumTweets){
-						console.log("FADED ALL LOOPS< RESETTING: "  + curTextID + " total: " + totalNumTweets);
+						// console.log("FADED ALL LOOPS< RESETTING: "  + curTextID + " total: " + totalNumTweets);
 						curTextID = 0;
 						
 					}
 					isFading = false;
 				}
-
-
 			}
               
               // do the "from" name
@@ -1072,11 +1087,6 @@
 			  textFont(BasicFont,tSize);
 			  text(tweetText, 45, 300 + lineHeight, textBoxW, textBoxH);
               textWidth(1024);
-              
-
-              
-              //tweetPicPath
-
 
 		  }
           
@@ -1130,20 +1140,10 @@
           }
           
       }
-	  private void doWordWrap(String theText){
-		// get the width to be filled ///////
-		// figure out how many chars per width
-		// count thru the chars till hit a the maxwidth
-		// save a line of text and put it in the array list
-		// keep going until all chars are reached
-
-		// merge array list as string with line breaks
-
-
-	  }
+	 
        // end text object ///////
       
-   // TIMER CLASS ////////
+   // TIMER CLASS for ANIMATION ////////
 class Timer {
  
   int savedTime; // When Timer started
@@ -1156,7 +1156,7 @@ class Timer {
   // Starting the timer
   void start() {
     // When the timer starts it stores the current time in milliseconds.
-	console.log("STARTING TIMER");
+	// console.log("STARTING TIMER");
     savedTime = millis(); 
   }
   
@@ -1185,12 +1185,13 @@ class Timer {
       <div id="nav-top">
           <ul id="nav-top-list">
              <li id="nav-butt-l"></li>
-             <li id="nav-butt"><a href="help.html" data-rel="dialog" data-transition="slide" style="color:#FFFFFF; text-decoration:none; font-weight:normal;">HELP</a></li>
+             <li id="nav-butt"><a href="help.html" data-transition="slide" style="color:#FFFFFF; text-decoration:none; font-weight:normal;">HELP</a></li>
              <li id="nav-butt-mid"></li>
-             <li id="nav-butt"><a href="#" onClick="doSave(); return false;" style="color:#FFFFFF; text-decoration:none; font-weight:normal;">SAVE</a></li>
+             <li id="nav-butt"><a href="#save_panel" data-rel="popup"  data-transition="pop" style="color:#FFFFFF; text-decoration:none; font-weight:normal;">SETTINGS</a></li>
              <li id="nav-butt-mid"></li>
-              <li id="nav-butt"><a href="#" onClick="retrieveSave(); return false;" style="color:#FFFFFF; text-decoration:none; font-weight:normal;">APPLY SAVED SETTINGS</a></li>
-              <li id="nav-butt-mid"></li>
+              <!-- <li id="nav-butt"><a href="#" onClick="retrieveSave(); return false;" style="color:#FFFFFF; text-decoration:none; font-weight:normal;">APPLY SAVED SETTINGS</a></li>
+                
+              <li id="nav-butt-mid"></li>!-->
              <li id="nav-butt"><a href="#" onClick="hideOverlay(); return false;" style="color:#FFFFFF; text-decoration:none; font-weight:normal;">HIDE</a></li>
              <li id="nav-butt-r"></li>
           </ul>
@@ -1274,16 +1275,16 @@ class Timer {
                    
             <li>
                 <div id="label-style">Background Image:</div>
-                 <a href="#" data-role="button" data-role="button" onClick="getPhoto(pictureSource.PHOTOLIBRARY); return false;" data-theme="a">Load Image</a>
+                 <a href="#" data-role="button" onClick="getPhoto(pictureSource.PHOTOLIBRARY); return false;" data-theme="a">Load Image</a>
                 <br><br>
-                 <a href="#" data-role="button" data-role="button" onClick="deletePhoto(); return false;" data-theme="a">Delete Image</a>
+                 <a href="#" data-role="button" onClick="deletePhoto(); return false;" data-theme="a">Delete Image</a>
                 
             </li>
                    
             <!-- misc config code !-->
             <li style="width:150px;">
             <div id="label-style" style="margin-bottom:10px;">Speed:</div>
-                <input type="range" class="speedslider" min="0" max="20" value="5" step="1" onchange="updateSpeed(this.value)"  data-theme="a" style="display : none !important; margin-bottom:10px;"/><br>
+                <input type="range" class="speedslider" min="0" max="20" value="10" step="1" onchange="updateSpeed(this.value)"  data-theme="a" style="display : none !important; margin-bottom:10px;"/><br>
             <div id="label-style" style=" margin-bottom:10px;">Animation Type:</div>
                 <select id="animation" onchange="changeAnim(this.value)"  data-theme="a">
                     <optgroup selected="selected" label="Animation Type" value="fade">Fade</option>
@@ -1303,10 +1304,18 @@ class Timer {
             </div>
             <!-- end interface !-->
         </div>
-      <!-- HELP SECTION !-->
-      <div id="help_panel" style="display:none;">
-          <div id="help_label"><a href="#"><img src="images/header_help.png" width="108" height="33"></a></div>
-          <div id="help_closeButton"><a href="#" onClick="hideHelp(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a></div>
-          
+    
+      <!-- SAVE SECTION !-->
+      <div id="save_panel" data-role="popup" data-position-to="window" data-theme="a" data-overlay-theme="a" style="padding:15px">
+          <a href="#" data-rel="back" data-role="button" data-theme="a" data-iconpos="notext" data-icon="delete" class="ui-btn-left">Close</a>
+          <h1 align="center">CONFIGURATION SETTINGS</h1>
+          <div style="width:300px;">Click "save" to save your font colors, background colors, animation type, and other settings. You can click "Load" to apply them at any time. If you want to delete your saved settings, click "Delete".</div>
+          <a href="#" data-role="button" onClick="doSave(); return false;"  data-theme="a">Save</a>
+          <a href="#" data-role="button" onClick="retrieveSave(); return false;"  data-theme="a">Load</a>
+          <a href="#" data-role="button" onClick="deleteSave(); return false;" data-theme="a">Delete</a>
       </div>
+      
+    <!-- end container -->
+      </div>
+    </body>
 </html>
