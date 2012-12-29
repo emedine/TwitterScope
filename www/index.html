@@ -48,7 +48,7 @@
     <!-- jquery mobile css !-->
     <link rel="stylesheet"  href="css/themes/default/jquery.mobile-1.2.0.css" />
                                 
-        
+    <!-- main page functions -->
     <script type="text/javascript">
 	// If you want to prevent dragging, uncomment this section
 	//*
@@ -107,15 +107,12 @@
         states[Connection.CELL_4G]  = 'Cell 4G connection';
         states[Connection.NONE]     = 'No network connection';
             
-        alert('Connection type: ' + states[networkState]);
-        /*
-        navigator.notification.alert(
-                                     states[networkState],  // message
-                                     alertDismissed,         // callback
-                                     'CONNECTION STATUS',            // title
-                                     'Close'                  // buttonName
-                                     );
-         */
+        // check network status and give an alert if there's no connection
+        console.log(states[networkState]);
+        if(states[networkState] == 'Unknown connection' || states[networkState] == 'No network connection'){
+            navigator.notification.alert(states[networkState] + '. This app requires a network connection in order to function properly. Please check your network settings and restart the application.', null, "CONNECTION STATUS", "Close");
+            
+        }
     }
     /// interface vars
     var theOverlay; /// help overlay
@@ -641,7 +638,7 @@
               String usrName = t.profileName;
 			  String theDate = t.date;
               String theImagePath = t.profileImageUrl;
-              console.log("Name: " + t.profileName);
+              // console.log("Name: " + t.profileName);
               
               // set profile image into tweet object by
               // loading a PImage of the profile pic
@@ -1016,7 +1013,7 @@
 					fadeOut = false;
 					/// start hold timer
 					timer = new Timer(pauseSpeed); // decrease the pause time
-                    console.log("TANIM: " + tAnimSpeed + "Fade speed:" + fadeSpeed + " Pause speed: " + pauseSpeed)
+                    // console.log("TANIM: " + tAnimSpeed + "Fade speed:" + fadeSpeed + " Pause speed: " + pauseSpeed)
 					timer.start();
 					// console.log("DONE FADE IN, HOLDING" + fadeHold + " " + tId + " "  + fadeOut);
 				}
@@ -1314,6 +1311,8 @@ class Timer {
           <a href="#" data-role="button" onClick="retrieveSave(); return false;"  data-theme="a">Load</a>
           <a href="#" data-role="button" onClick="deleteSave(); return false;" data-theme="a">Delete</a>
       </div>
+      
+     
       
     <!-- end container -->
       </div>

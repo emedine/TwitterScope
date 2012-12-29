@@ -101,7 +101,7 @@ a { text-decoration: none; }
 	text-align: center;
 	height:768px;
 	position:relative;
-    overflow: hidden;
+    
 
 }
 
@@ -115,7 +115,6 @@ a { text-decoration: none; }
 	bottom: 0px;
 	margin: 0px;
 	border: 0px;
-
 }
 
 #canvas {
@@ -180,6 +179,7 @@ ul#nav-top-list li{
     top:410px;
     left:20px;
     background: url('../images/interface_bground.png') no-repeat;
+    
     
 }
 #header_container{
@@ -267,26 +267,7 @@ body .colorwell-selected {
 }
 
 
-/* help window styles */
-#help_panel{
-    width:872px;
-	margin: 0 auto;
-	min-height:586px;
-    position:absolute;
-    top:91px;
-    left:72px;
-    background: url('../images/help_bground.png') no-repeat;
-    
-}
-#help_label{
-	margin-top:20px;
-	margin-left:45px;
-	float:left;
-	
-}
-#help_closeButton{
-	margin-top:20px;
-	float:right;
-	margin-right:45px;
-	
+/* jquery mobile fixes */
+.ui-page {
+    -webkit-backface-visibility: hidden;
 }
