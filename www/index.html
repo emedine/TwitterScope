@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
-  <title></title>
+  <title>CineTweet</title>
   
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" /> previous scalability-->
+    <meta name="viewport" content="width=device-width, initial-scale="1"">
 	<meta charset="utf-8">
 
 
@@ -62,16 +63,9 @@
 	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
 	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
 	for more details -jm */
-	/*
-	function handleOpenURL(url)
-	{
-		// TODO: do something with the url passed in.
-	}
-	*/
 	
 	function onBodyLoad()
 	{
-        checkConnection();
 		document.addEventListener("deviceready", onDeviceReady, false);
         //// INIT STARTUP CONFIGURATIONS
         var theSelectedButton = document.getElementById("color2");
@@ -81,14 +75,21 @@
         theData = new Lawnchair({name:'settings'},function(e){
                                 console.log('storage open');
                                 });
+        
 	}
         
     // turn off app when the back key is down
     function onDeviceReady(){
+        $('#myInput').bind('focus',function(event){
+                           window.scrollTo(0, 0);
+                           document.body.scrollTop = 0;
+                           });
         
         
+       
         checkConnection();
         document.addEventListener("backbutton",onBackKeyDown,true);
+        
     }
         
 	/* When this function is called, Cordova has been initialized and is ready to roll */
@@ -207,6 +208,11 @@
         console.log("Hit Home Key");
         navigator.device.exitApp();
     }
+    function scrollTop(){
+        console.log("ScrollTOP");
+        window.scrollTo(0,1);
+            
+    }
         
     /// end device functions
     /////////////////////////
@@ -236,10 +242,11 @@
     function changeSearch(){
 
         var searchBox = document.getElementById("search-box");
-        console.log("CHANGE SEARCH: " + searchTerm);
         var searchTerm = searchBox.value;
         processingInstance = Processing.getInstanceById('tweets');
     	processingInstance.initSearch(searchTerm);
+                console.log("CHANGE SEARCH: " + searchTerm);
+        scrollTop();
       
     }
         /// toggle twitter pic
@@ -481,10 +488,28 @@
                                      });
                         });
     </script>
+    <!-- REPOSITION AND RESIZE FUNCTIONS -->
+    <script type="text/javascript" charset="utf-8">
+
+        /// check for reposition window
+        $(window).resize(function(e) {
+                         // alert('The window resize occurred!  Width: ' + $(window).width() + " Height: " + $(window).height());
+                         scrollTop();
+                         $(window).animate({top: '0px'});
+                         console.log("REPOSITION WINDOW");
+                         return false;
+                         });
+    </script>
 
         
   </head>
-  <body onLoad="onBodyLoad()">
+    
+    
+ <!-- START BODY !-->
+ <!-- PROCESSING CODE NEEDS TO BE IMMEDIATELY
+ BEFORE THE CANVAS TAG !-->
+ 
+  <body onLoad="onBodyLoad()" style="background-color:#000000">
 
   <div id="container">
   <!--
@@ -562,7 +587,7 @@
 
     void setup() {
         
-      searchTerm = "#coachella";
+      searchTerm = "twitter";
       // XXX: jbuck: "just subtract 10"
 	  size(1024, 760);
         
@@ -581,7 +606,7 @@
       
       void initSearch(string tSearch){
           // zero out everything
-          searchTerm = tSearch;
+          searchTerm = "#" + tSearch;
           try{
               hasTweets = false;
 
@@ -1172,27 +1197,23 @@ class Timer {
  }
 
       
-      
+  //////// END PROCESSING CODE //////////
   </script>
+      
       <canvas id="tweets">
           <p>Please upgrade your browser to something newer, like <a href="http://chrome.google.com" target="_blank">Google Chrome</a></p>
       </canvas>
       
+   
        <!-- TOP NAV !-->
       <div id="nav-top">
-          <ul id="nav-top-list">
-             <li id="nav-butt-l"></li>
-             <li id="nav-butt"><a href="help.html" data-transition="slide" style="color:#FFFFFF; text-decoration:none; font-weight:normal;">HELP</a></li>
-             <li id="nav-butt-mid"></li>
-             <li id="nav-butt"><a href="#save_panel" data-rel="popup"  data-transition="pop" style="color:#FFFFFF; text-decoration:none; font-weight:normal;">SETTINGS</a></li>
-             <li id="nav-butt-mid"></li>
-              <!-- <li id="nav-butt"><a href="#" onClick="retrieveSave(); return false;" style="color:#FFFFFF; text-decoration:none; font-weight:normal;">APPLY SAVED SETTINGS</a></li>
-                
-              <li id="nav-butt-mid"></li>!-->
-             <li id="nav-butt"><a href="#" onClick="hideOverlay(); return false;" style="color:#FFFFFF; text-decoration:none; font-weight:normal;">HIDE</a></li>
-             <li id="nav-butt-r"></li>
-          </ul>
-      </div>
+          <div data-role="controlgroup" data-type="horizontal" align="center"  data-mini="true">
+              <a href="help.html" data-role="button" data-transition="slide" data-icon="info" data-theme="a" >HELP</a>
+              <a href="#save_panel" data-role="button" data-rel="popup"  data-transition="pop" data-icon="gear" data-theme="a">SETTINGS</a>
+              <a href="#" onClick="hideOverlay(); return false;" data-role="button" data-icon="minus" data-theme="a">HIDE</a>
+          </div>
+    </div>
+      
       
       <!-- INTERFACE and CONFIG !  -->
         <div id="interface">
@@ -1302,14 +1323,23 @@ class Timer {
             <!-- end interface !-->
         </div>
     
-      <!-- SAVE SECTION !-->
-      <div id="save_panel" data-role="popup" data-position-to="window" data-theme="a" data-overlay-theme="a" style="padding:15px">
-          <a href="#" data-rel="back" data-role="button" data-theme="a" data-iconpos="notext" data-icon="delete" class="ui-btn-left">Close</a>
-          <h1 align="center">CONFIGURATION SETTINGS</h1>
-          <div style="width:300px;">Click "save" to save your font colors, background colors, animation type, and other settings. You can click "Load" to apply them at any time. If you want to delete your saved settings, click "Delete".</div>
-          <a href="#" data-role="button" onClick="doSave(); return false;"  data-theme="a">Save</a>
-          <a href="#" data-role="button" onClick="retrieveSave(); return false;"  data-theme="a">Load</a>
-          <a href="#" data-role="button" onClick="deleteSave(); return false;" data-theme="a">Delete</a>
+      <!-- SETTINGS SECTION !-->
+      <div id="save_panel" data-role="popup" data-position-to="window" data-theme="a" data-overlay-theme="a">
+          <div data-role="header" id="header" style="height:40px">
+                        <a href="#" data-rel="back" data-role="button" data-theme="a"data-icon="delete" class="ui-btn-left" data-mini="true">Close</a>
+             <!-- <a href="#" data-role="button" data-rel="back" data-icon="arrow-l" data-theme="a" data-transition="slide" data-direction="reverse" data-mini="true">BACK</a>
+              !--><h1 align="center">SETTINGS</h1>
+          </div>
+          
+
+          
+          <div style="width:300px; padding:15px; text-align:left;">Click "Save" to save application settings such as your font colors, background colors, background images, animation type, and transition speed. <br><br>Click "Load" to apply the saved settings at any time. If you want to delete your saved settings, click "Delete".
+          <div align="center" style="margin-top:15px;">
+              <a href="#" data-role="button" onClick="doSave(); return false;"  data-theme="a" style="width:150px;">Save</a>
+              <a href="#" data-role="button" onClick="retrieveSave(); return false;"  data-theme="a" style="width:150px;">Load</a>
+              <a href="#" data-role="button" onClick="deleteSave(); return false;" data-theme="a" style="width:150px;">Delete</a>
+            </div>
+         </div>
       </div>
       
      

@@ -86,12 +86,12 @@ a { text-decoration: none; }
 
 
 #header {
-	margin:0 auto;
-	text-align: center;
-	width:100%;
-	height:170px;
-	background: url('../images/bground_top.png') no-repeat;
-	position:relative;
+    /*
+    top:0px;
+    left:0px;
+    height:60px;
+    background-color:#ffff00;
+     */
 
 }
 #content {
@@ -124,51 +124,16 @@ a { text-decoration: none; }
 /* TOP NAV STYLES */
 #nav-top{
     width:1024px;
-	margin: 0 auto;
-	min-height:100px;
+	margin-top: 0 auto;
+    padding-top:0px;
     position:absolute;
     top:0px;
     left:0px;
-    background: url('../images/top_nav_bground.jpg') no-repeat;
+    height:60px;
+    background: url('../images/nav_bground.jpg') repeat-x;
     
-}
-#nav-top-list{
-    margin-top:8px;
-    margin-left:350px;
-}
-ul#nav-top-list li{
-    list-style-type:none;
-    float:left;
-    color:#FFFFFF;
 }
 
-#nav-butt-l{
-    width:5px;
-    height:50px;
-    background: url('../images/nav_butt_l.png') no-repeat;
-    
-}
-#nav-butt-mid{
-    width:2px;
-    height:50px;
-    background: url('../images/nav_butt_mid.jpg') no-repeat;
-    
-}
-#nav-butt{
-    padding-left:20px;
-    padding-right:20px;
-    height:50px;
-    background: url('../images/nav_butt_bg.jpg') no-repeat;
-    background-repeat:repeat-x;
-    padding-top:15px;
-}
-#nav-butt-r{
-    width:5px;
-    height:50px;
-    width:5px;
-    background: url('../images/nav_butt_r.png') no-repeat;
-    
-}
 /* INTERFACE STYLES */
 
 #interface{

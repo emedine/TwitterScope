@@ -80,7 +80,7 @@
           imageSize: 24,       // Size of image in pixels
           refresh:   true,
           timeLinks: true,
-          retweets:  false,
+          retweets:  true,
           service:   false,
 		  showAuthor: true,
           localization: {
@@ -166,7 +166,7 @@
                 q:        (this.query && this.query !== '') ? this.query : null,
                 geocode:  this.settings.geocode,
                 lang:     this.settings.lang,
-                rpp:      (this.settings.rpp) ? this.settings.rpp : this.settings.limit
+                rpp:      '100', // (this.settings.rpp) ? this.settings.rpp : this.settings.limit
               };
 
             // User/home timeline mode
@@ -369,9 +369,10 @@
         var twitter = this.twitter;
 
         // Update the timestamps in realtime
+        // this is how far back we want to go
         this.timeInterval = setInterval(function () {
           twitter.updateTimestamps();
-        }, 5000);
+        }, 50000); /// default 5000
 
         this.twitter.start();
       }
