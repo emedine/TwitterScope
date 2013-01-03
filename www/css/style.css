@@ -58,11 +58,8 @@ sup { top: -0.5em; }
 sub { bottom: -0.25em; }
 
 pre { white-space: pre; white-space: pre-wrap; word-wrap: break-word; padding: 15px; }
-textarea { overflow: auto; }
 .no-boxshadow input:invalid, .no-boxshadow textarea:invalid { background-color: #f0dddd; }
 
-
-button {  width: auto; overflow: visible; }
 .ie7 img { -ms-interpolation-mode: bicubic; }
 
 h1, h2, h3, h4, h5, h6 { font-weight: bold; }
@@ -219,11 +216,9 @@ ul#config_list li{
    
 }
 body .colorwell-selected {
-
+    
     
 }
-
-
 
 /* COLOR PICKER ITEM STYLES */
 

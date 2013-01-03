@@ -7,28 +7,21 @@
         <title>HELP</title>
         <script type="text/javascript" charset="utf-8" src="cordova-1.7.0.js"></script>
         <script type="text/javascript" src="js/jquery.mobile-1.2.0.min.js"></script>
-        <link href="css/style.css" rel="stylesheet" type="text/css">
+        <!-- jquery mobile css !-->
+        <link rel="stylesheet"  href="css/themes/default/jquery.mobile-1.2.0.css" />
                 
     </head>
     
     <body style="background:#000000";>
         
         <div data-role="page">
-            <!-- 
-            <div id="nav-top">
-                <div data-role="controlgroup" data-type="horizontal" style="margin-left:15px;">
-                    <a href="#" data-role="button" data-rel="back" data-icon="arrow-l" data-theme="a" data-transition="slide" data-direction="reverse">BACK</a><h1 style="float:right; margin-left:200px; display:inline-block;
-                        vertical-align:middle; color:#FFFFFF;">HELP</h1>
-                </div>
-            </div>
-             -->
             <!-- /header -->
-            <div data-role="header" id="header">
+            <div data-role="header" id="header"  data-position="fixed">
               <a href="#" data-role="button" data-rel="back" data-icon="arrow-l" data-theme="a" data-transition="slide" data-direction="reverse" data-mini="true">BACK</a><h1>HELP</h1>
             </div>
             <!-- /content -->
-            <div data-role="content" data-theme="a">
-                <div id="help_textbox">
+            <div data-role="content" data-theme="a" style="overflow-y: scroll; -webkit-overflow-scrolling: touch;">
+                
                     <p>CineTweet is an iPad app that lets you display your tweets for presentation purposes such as trade shows, corporate events, and music festivals. You can change background colors and font color to match your branding style guides, and even upload a logo or background image.
                     </p>
                     <br>
@@ -47,10 +40,10 @@
                         <li style="padding:30px;">To show or hide the profile picture:<br>The "Show Pic" toggle will change the visibility of the user's profile picture.</li>
                     </ul>
                 </div>
-            </div>
+           
+           <!-- /page --> 
             
-            
-        </div><!-- /page -->
+        </div>
         
     </body>
 </html>

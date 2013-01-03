@@ -55,8 +55,9 @@
 	// If you want to prevent dragging, uncomment this section
 	//*
 	function preventBehavior(e) 
-	{ 
-      e.preventDefault(); 
+	{
+      // this fixes the window, but disables scrolling :(
+      /// e.preventDefault();
     };
 	document.addEventListener("touchmove", preventBehavior, false);
 	//*/
@@ -72,9 +73,9 @@
 		document.addEventListener("deviceready", onDeviceReady, false);
         //// INIT STARTUP CONFIGURATIONS
         var theSelectedButton = document.getElementById("color2");
-
-
-
+        // theSelectedButton.addClass('colorwell-selected');
+        // $("#color2").css("opacity", "1");
+        $(selected = "#color2").css('opacity', 1).addClass('colorwell-selected');
         // theSelectedButton.className += 'colorwell-selected';
         // theData = new Lawnchair("settings");
         console.log("STARTING APP and INITILIZING DB");
@@ -93,11 +94,10 @@
                                                     
                                                     }
                                                     processingInstance.clearSearch();
-                                                    
-                                                         console.log("SEARCHING: " + searchTerm);
-                                                         e.preventDefault();
-                                                         JQUERY4U.WIDGETS.TWITTER.init(searchTerm);
-                                                         });
+                                                    console.log("SEARCHING: " + searchTerm);
+                                                    e.preventDefault();
+                                                    JQUERY4U.WIDGETS.TWITTER.init(searchTerm);
+                                                    });
         
 	}
         
@@ -109,7 +109,7 @@
                            });
         
         
-       
+
         checkConnection();
         document.addEventListener("backbutton",onBackKeyDown,true);
         
@@ -503,16 +503,17 @@
                         var p = $('#picker');
                         var selected;
                         $('.colorwell')
-                        .each(function () { f.linkTo(this); $(this).css('opacity', 1); })
+                        .each(function () { f.linkTo(this); $(this).css('opacity', .5); })
                         .focus(function() {
                                /// handle button highlights
                                 if (selected) {
-                                     $(selected).css('opacity', 1).removeClass('colorwell-selected');
+                                     $(selected).css('opacity', .5).removeClass('colorwell-selected');
                                      }
                                      f.linkTo(this);
                                      p.css('opacity', 1);
                                      $(selected = this).css('opacity', 1).addClass('colorwell-selected');
                                      });
+                          $(selected = "#color2").css('opacity', 1).addClass('colorwell-selected');
                         });
     </script>
     <!-- REPOSITION AND RESIZE FUNCTIONS -->
@@ -537,9 +538,10 @@
 
   <div id="container">
   <!--
-  PROCESSING APPLICATION START
-   PROCESSING CODE NEEDS TO BE IMMEDIATELY
-   BEFORE THE CANVAS TAG !
+   ////////////////////////////////////////////////////////////////
+   PROCESSING APPLICATION START
+   PROCESSING CODE NEEDS TO BE IMMEDIATELY BEFORE THE CANVAS TAG !
+   /////////////////////////////////////////////////////////////////
    -->
   <script id='sketch' type="application/processing">
 
@@ -624,6 +626,8 @@
           try{
               hasTweets = false;
               
+              var readoutNums = document.getElementById("num-tweet-readout");
+              readoutNums.value = 0;
               // tweets.clear();
               curTextID = 0;
               totalNumTweets = 0;
