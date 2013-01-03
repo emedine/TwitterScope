@@ -21,7 +21,7 @@
     <!-- processing and cordova scripts !-->
     <script type="text/javascript" charset="utf-8" src="cordova-1.7.0.js"></script>
     <script src="js/processing.js" type="text/javascript"></script>
-    <script src="js/processing-twitter.js" type="text/javascript"></script>
+
 
     <!-- save functions !-->
     <script type="text/javascript" src="js/Lawnchair.js"></script>
@@ -38,6 +38,7 @@
         
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/farbtastic.js"></script>
+    <script type="text/javascript" charset="utf-8" src="twitter-search-api.js"></script>
         
     <!-- jquery mobile  !-->   
     <script src="js/jquery.mobile-1.2.0.min.js"></script>
@@ -63,18 +64,40 @@
 	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
 	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
 	for more details -jm */
-	
+
 	function onBodyLoad()
 	{
+        
+               
 		document.addEventListener("deviceready", onDeviceReady, false);
         //// INIT STARTUP CONFIGURATIONS
         var theSelectedButton = document.getElementById("color2");
+
+
+
         // theSelectedButton.className += 'colorwell-selected';
         // theData = new Lawnchair("settings");
         console.log("STARTING APP and INITILIZING DB");
         theData = new Lawnchair({name:'settings'},function(e){
                                 console.log('storage open');
                                 });
+        
+        ///////// this initializes the twitter search on-click
+                               $('#go_button').live('click', function(e)
+                                                         {
+                                                    var searchBox = document.getElementById("search-box");
+                                                    var searchTerm = searchBox.value;
+                                                    if (!processingInstance) {
+                                                    // console.log("Adding tweet" + theText);
+                                                    processingInstance = Processing.getInstanceById('tweets');
+                                                    
+                                                    }
+                                                    processingInstance.clearSearch();
+                                                    
+                                                         console.log("SEARCHING: " + searchTerm);
+                                                         e.preventDefault();
+                                                         JQUERY4U.WIDGETS.TWITTER.init(searchTerm);
+                                                         });
         
 	}
         
@@ -238,17 +261,21 @@
         animTypeConfig = animType;
     	
     }
-    /// search function
-    function changeSearch(){
 
-        var searchBox = document.getElementById("search-box");
-        var searchTerm = searchBox.value;
-        processingInstance = Processing.getInstanceById('tweets');
-    	processingInstance.initSearch(searchTerm);
-                console.log("CHANGE SEARCH: " + searchTerm);
-        scrollTop();
-      
+    //// GET THE RETURNED SEARCH AND PASS IT TO PROCESSING
+    function addTweet(theName, theDate, theText, theURL){
+        if (!processingInstance) {
+                // console.log("Adding tweet" + theText);
+            processingInstance = Processing.getInstanceById('tweets');
+                
+        }
+
+        // appendTweet(profileName, theDate, theText, thePicUrl){
+        processingInstance.appendTweet(theName, theDate, theText, theURL);
+   
     }
+
+        
         /// toggle twitter pic
     function togglePic(toggleValue){
         console.log("TOGGLE PIC:  " + toggleValue);
@@ -500,26 +527,22 @@
                          return false;
                          });
     </script>
-
-        
+  
   </head>
     
     
  <!-- START BODY !-->
- <!-- PROCESSING CODE NEEDS TO BE IMMEDIATELY
- BEFORE THE CANVAS TAG !-->
  
   <body onLoad="onBodyLoad()" style="background-color:#000000">
 
   <div id="container">
   <!--
-  CANVAS PROCESSING FUNCTIONS
+  PROCESSING APPLICATION START
+   PROCESSING CODE NEEDS TO BE IMMEDIATELY
+   BEFORE THE CANVAS TAG !
    -->
   <script id='sketch' type="application/processing">
 
-      // Global ArrayList of tweets is created in processing-twitter.js
-      ArrayList<String> words = new ArrayList();
-      
       /// GLOBAL PROPERTIES
       int tWidth = 1024;  /// canvas width
       int tHeight = 760;  /// canvas height
@@ -538,7 +561,7 @@
       
       string searchTerm;
       
-      // Dynamic list of Tweet objects
+      /// ARRAY LIST OF TEXT OBJECTS
       /// this holds our images
       HashMap uniqueTweets;
       //// text object
@@ -563,7 +586,7 @@
       PFont fontTwo;
 
       // IMAGES
-      // PImage tweetPic;
+      PImage tweetPic;
       PImage bgroundImage;
       boolean showBGImage = false;
       /// ANIMATION PRESETS
@@ -576,16 +599,8 @@
       int theMargin = 50; // margins from side to side
       int charWidth = 10; // width of the text characters
       
-    class Tweet {
-      public String id;
-      public String profileName;
-      public String profileImageUrl;
-      public PImage profileImage; // needs to be loaded manually
-      public String text;
-      public Date time;
-    }
-
-    void setup() {
+ 
+      void setup() {
         
       searchTerm = "twitter";
       // XXX: jbuck: "just subtract 10"
@@ -599,61 +614,86 @@
       // Slow things down a bit...
       frameRate(30);
 
-               
-       initSearch(searchTerm);
+      TextObjectArray = new ArrayList();
+       // initSearch(searchTerm);
         
     }
       
-      void initSearch(string tSearch){
+      void clearSearch(){
           // zero out everything
-          searchTerm = "#" + tSearch;
           try{
               hasTweets = false;
-
+              
               // tweets.clear();
               curTextID = 0;
-              // hash map that holds our tweet objects and images
-              uniqueTweets = new HashMap();
-              // text object array that holds all the text objects
-              
+              totalNumTweets = 0;
               TextObjectArray = new ArrayList();
               // set text sizes, pre-populate the array
               /// I don't think we need this anymore
               TextSizes = new int[100];
               TextPosY = new int[100];
               TextSizes[0] = tweetTextSize;
-
+              
           } catch (e:Error){
               
               console.log("Can't reset tweets: " + e);
           }
-          /// show the loading function
+          /// show the loading animation
           showLoader();
-          
-          // Start a live feed loading, results will be available in a global
-          // ArrayList called tweets.  loadTweets() is a custom method added
-          // by processing-twitter.js
-          loadTweets(searchTerm);
-          
-          // You can also pass geolocation data to limit tweets to a geographic area
-          // loadTweets('class', '43.7496,-79.4886,1km'); // York University
-          spawnText();
-
-          
       }
+      //  addTweet(this.from_user, since, this.text, this.profile_image_url);
+      void appendTweet(profileName, theDate, theText, thePicUrl, tID){
+          console.log("APPEND TWEET");
+          //// ADD TEXT SPAWN
+          if(theText != "null" || theTweet != "" || theTweet){
+          try{
+          theTextObject = new TextObject();
+          TextObjectArray.add(theTextObject);
+          
+          totalNumTweets += 1;
+          /// add all data to text object
+          String msg = theText;
+          String usrName = profileName;
+          String theDate = theDate;
+          String theImagePath = thePicUrl; /// this causes cross-domain issues
+          String theID = tID; // the tweet id
+              
+          // set profile image into tweet object by
+          // loading a PImage of the profile pic
+          // this may be the canvas taint workaround
+          // t.profileImage = requestImage(theImagePath);
+          // save tweet object to our hashmap list of unique tweets
+          // uniqueTweets.put(theID, t);
+
+
+          // init
+          theTextObject.initText(msg, usrName, theImagePath, theDate, tweetTextSize, theID);
+          
+          // update readout
+          updateTweetReadout(TextObjectArray.size());
+          
+          hasTweets = true;
+          } catch (Exception e){
+              
+              console.log("Cant't add: " + msg + " " + theText + e);
+          }
+          }
+          
+          /// should do position sort right about here
+          tweetPositionVert()
+      }
+      
+
       
       /// does the initial spawn
       void spawnText(){
-          
+
           /*
-          String[] fontList = PFont.list();
-          console.log(fontList);
-           */
           int prevBoxH = 0;
           int totalBoxH = 0;
           
           // If we haven't created the text objects, do it now
-          if (tweets.size() > 0){
+          
               console.log("spawn text objects: " + tweets.size());
               for (int i = 0; i < tweets.size(); i++) {
 			
@@ -690,7 +730,7 @@
                   
               updateTweetReadout(tweets.size());
               // theTextObject.theY = (i * 200)-200; /// start spawning above 0 so there's no gap
-          }
+         
           /// get the total height of all the tweets for scrolling positioning
           console.log("TOTAL TWEETS: " + tweets.size() + "TOTAL BOX HEIGHT = " + vertScrollHeight + " JUST SPACING: "  + tweets.size()*tBoxSpace);
 
@@ -700,7 +740,7 @@
           hideLoader();
 
           }
-          
+          */
       }
 
     void draw() {
@@ -715,7 +755,7 @@
          // CHECK FOR TWITTER DATA
         // if none, spawn the text object
         if (!hasTweets) {
-            spawnText(); 
+            // spawnText();
         }
 
 		doTextObjectAnim();
@@ -844,7 +884,7 @@
 			setTextObjectScroll();
     		break;
   		case 'wipe': 
-    		println("wipe"); 
+    		// println("wipe");
     		break;
  		 default:
     		break;
@@ -852,7 +892,29 @@
       }
 	
 	///// SET ALL TEXT OBJECT ANIMATION //////
+    void tweetPositionVert(){
+        int prevBoxH = 0;
+        int totalBoxH = 0;
+        
+
+        for (int i = 0; i < TextObjectArray.size(); i++){
+            TextObject dTextObj = TextObjectArray.get(i);
+            /// space the objects with v spacing + the line height
+            
+            dTextObj.theY = ((i*tBoxSpace) + prevBoxH) - tBoxSpace;
+            // console.log("PREV BOX HEIGHT = " + prevBoxH);
+            prevBoxH = dTextObj.textBoxH;
+            totalBoxH += prevBoxH;
+            vertScrollHeight = (TextObjectArray.size()*tBoxSpace);//  + totalBoxH;
+            
+
+        }
+          
+          
+    }
 	public void setTextObjectFade(){
+       //*
+        
  		for (int i = 0; i < TextObjectArray.size(); i++){
             try{
                 // update text object
@@ -874,6 +936,7 @@
                 println("Can't find object for fade: " + e);
             }
         }	
+        // */
 	}
       
       /// RESET TEXT OBJECT FADE
@@ -916,23 +979,6 @@
 
 	//// END SET ALL TEXT OBJECT ANIM /////
       
-    ///// DEVICE FUNCTIONS
-      // stop app when hit home
-      
-      // geolocation filter
-      
-      /// wifi checker
-      
-    ///// MESSAGING FUNCTIONS
-        
-      /// error message
-        // on
-        // off
-      
-      // help window
-      
-      // info window
-
       
     //// TEXT OBJECT /////////
       // /*
@@ -940,9 +986,13 @@
           String tweetText = "";
           String tweetName = "";
 		  String tweetTime = "";
-          // String tweetPicPath = "";
+
           int numChars;
           int totalCharWidth = 0;
+          
+          //
+          String tweetPicPath = "";
+          public PImage profileImage;
 
           int tSize= 36; // text size
           // int tSpacing = 60; // single line spacing
@@ -970,19 +1020,24 @@
 		  boolean fadeHold = false;      
 		  boolean fadeOut = false;
 		  boolean isFading = false;
-     
+          
+          // .initText(msg, usrName, theImagePath, theDate, tweetTextSize, theID);
+          // void initText(String theTweet, String theName, String theImagePath, String theDate, int theSize, int theID){
           void initText(String theTweet, String theName, String theImagePath, String theDate, int theSize, int theID){
-              tId = theID;
+              tId = theID; /// id of the tweet we suse this to find the image
               String rawTweet = theTweet;
               tweetText = rawTweet.replace("\n", "");
               tweetText = trim(tweetText); /// get rid of whitespace
               tweetName = theName;
 			  tweetTime = theDate;
+              tweetPicPath = theImagePath;
               /// set the size
               int tSize= theSize;
               //
-              numChars = theTweet.length();
+              numChars = tweetText.length();
               
+              // setup the image?
+              profileImage = requestImage(tweetPicPath);              
               // calculate the total length by adding up
               // the width of all the characters
               for(int l=0; l<numChars; l++){
@@ -1088,17 +1143,17 @@
               // text(tweetName + "   ..." + tweetTime, 45 + thePadding, 300, textBoxW, textBoxH);
               /// draw the image
               
-              
               if(showPic){
                   picWidth = 60;
               
                   try{
+                      // String picPath = tweetPicPath; // "618px-Trollface_HD.png"; //
+                      // tweetPic = loadImage(picPath);
                       //half the screen width - half the text box width
                       int picPosX = round(1024/2) - round(textWidth(headerText)/2);
-                      object t = uniqueTweets.get(tId); // get(tId);
-                      image(t.profileImage, picPosX, 300 - picAdjY);
+                      image(profileImage, picPosX, 300 - picAdjY);
                   } catch(e:error){
-                      console.log("can't find tweet object: ");
+                      console.log("can't find tweet pic: " + e);
                   }
               } else {
                   picWidth = 0;
@@ -1127,10 +1182,9 @@
 
                   if(showPic){
                       picWidth = 60;
-                      object t = uniqueTweets.get(tId); // get(tId);
-                      // Draw the profile image
+                       // Draw the profile image
                       try{
-                          image(t.profileImage, theMargin, theY - picAdjY);
+                          image(profileImage, theMargin, theY - picAdjY);
                       } catch(e:error){
                         console.log("can't find tweet object: " + e);
                     }
@@ -1195,6 +1249,47 @@ class Timer {
    }
    
  }
+      
+ ////////// TWEET USER PROFILE ///////////
+     class UserProfile {
+          
+          /// USER DATA
+          long userID;
+          long StatusID;
+          String userName;
+          String screenName;
+          String tweetText = ""; /// have a default value just in case
+          String timeZone;
+          String theLocation;
+          String createdAt;
+          String replyToID;
+          String geoCoords;
+          String tweetPolarity; /// sentiment of tweet, neg is 0, neutral is 2, pos is 4;
+          String replyToScreenName; // screen name of person replied to, if it's a reply
+          int followersCount = 0;
+          int favoritesCount = 0;
+          int friendsCount = 0;
+          int reTweetCount = 0;
+          long reTweetToID;
+          //
+          boolean isReTweet;
+         //
+         
+          
+          
+          // Creates new USER
+          UserProfile() {
+              
+              
+          }
+          public void initUser(){
+              /// this should ping the DB and add a user
+              
+          }
+          
+          
+          
+      }
 
       
   //////// END PROCESSING CODE //////////
@@ -1246,12 +1341,12 @@ class Timer {
 
                 <li style="margin-right:5px;">
                     <div id="label-style">Search Term:</div>
-                    <input type="text" id="search-box" name="twittersearch" size="20" onChange="changeSearch()" data-theme="a" style="width:140px;"/>
+                    <input type="text" id="search-box" name="twittersearch" size="20"  data-theme="a" style="width:140px;"/>
                     <!-- activate search !-->
                     
                 </li>
                 <li><br>
-                    <a href="#" data-role="button" onClick="changeSearch(); return false;" data-theme="a" style="width:70px;">GO!</a>
+                    <a href="#" data-role="button" id="go_button" data-theme="a" style="width:70px;">GO!</a>
                 </li>
                 <li>
                     <div id="readout-style">Tweets:

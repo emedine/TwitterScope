@@ -166,7 +166,7 @@
                 q:        (this.query && this.query !== '') ? this.query : null,
                 geocode:  this.settings.geocode,
                 lang:     this.settings.lang,
-                rpp:      '100', // (this.settings.rpp) ? this.settings.rpp : this.settings.limit
+                rpp:      (this.settings.rpp) ? this.settings.rpp : this.settings.limit
               };
 
             // User/home timeline mode
