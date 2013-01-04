@@ -45,7 +45,6 @@
         
     <!-- jquery touchswipe !-->
     <script src="js/jquery.touchSwipe-1.2.5.js"></script>
-    
 
     <!-- jquery mobile css !-->
     <link rel="stylesheet"  href="css/themes/default/jquery.mobile-1.2.0.css" />
@@ -54,23 +53,44 @@
     <script type="text/javascript">
 	// If you want to prevent dragging, uncomment this section
 	//*
-	function preventBehavior(e) 
+	function preventBehavior(e)
 	{
       // this fixes the window, but disables scrolling :(
-      /// e.preventDefault();
+      e.preventDefault();
     };
-	document.addEventListener("touchmove", preventBehavior, false);
+	// document.addEventListener("touchmove", preventBehavior, false);
 	//*/
 	
 	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
 	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
 	for more details -jm */
 
+    ///// ONCE THE iPAD IS READY, INIT
+    document.addEventListener("deviceready",onDeviceReady,false);
+
+    function onDeviceReady(){
+        /// prep the camera and photo gallery config
+        pictureSource=navigator.camera.PictureSourceType;
+        destinationType=navigator.camera.DestinationType;
+        
+        //// default button states for color
+            $('#myInput').bind('focus',function(event){
+                               window.scrollTo(0, 0);
+                               document.body.scrollTop = 0;
+                               });
+            
+            
+        /// check to see if you have a wifi connection
+        checkConnection();
+            
+    }
+        
+        
+
+        
 	function onBodyLoad()
 	{
-        
-               
-		document.addEventListener("deviceready", onDeviceReady, false);
+
         //// INIT STARTUP CONFIGURATIONS
         var theSelectedButton = document.getElementById("color2");
         // theSelectedButton.addClass('colorwell-selected');
@@ -86,37 +106,19 @@
         ///////// this initializes the twitter search on-click
                                $('#go_button').live('click', function(e)
                                                          {
+                                                    scrollTop();
                                                     var searchBox = document.getElementById("search-box");
                                                     var searchTerm = searchBox.value;
                                                     if (!processingInstance) {
-                                                    // console.log("Adding tweet" + theText);
                                                     processingInstance = Processing.getInstanceById('tweets');
                                                     
                                                     }
                                                     processingInstance.clearSearch();
-                                                    console.log("SEARCHING: " + searchTerm);
                                                     e.preventDefault();
                                                     JQUERY4U.WIDGETS.TWITTER.init(searchTerm);
                                                     });
         
 	}
-        
-    // turn off app when the back key is down
-    function onDeviceReady(){
-        $('#myInput').bind('focus',function(event){
-                           window.scrollTo(0, 0);
-                           document.body.scrollTop = 0;
-                           });
-        
-        
-
-        checkConnection();
-        document.addEventListener("backbutton",onBackKeyDown,true);
-        
-    }
-        
-	/* When this function is called, Cordova has been initialized and is ready to roll */
-	
 
     function checkConnection() {
         console.log("Checking Network connection");
@@ -388,18 +390,7 @@
         ////// CAMERA and PICTURE UPLOAD FUNCTIONS /////////////
         var pictureSource;   // picture source
         var destinationType; // sets the format of returned value
-        
-        // Wait for Cordova to connect with the device
-        //
-        document.addEventListener("deviceready",onDeviceReady,false);
-        
-        // Cordova is ready to be used!
-        //
-        function onDeviceReady() {
-            pictureSource=navigator.camera.PictureSourceType;
-            destinationType=navigator.camera.DestinationType;
-        }
-        
+
         // Called when a photo is successfully retrieved
         //
         function onPhotoDataSuccess(imageData) {
@@ -516,20 +507,7 @@
                           $(selected = "#color2").css('opacity', 1).addClass('colorwell-selected');
                         });
     </script>
-    <!-- REPOSITION AND RESIZE FUNCTIONS -->
-    <script type="text/javascript" charset="utf-8">
-
-        /// check for reposition window
-        $(window).resize(function(e) {
-                         // alert('The window resize occurred!  Width: ' + $(window).width() + " Height: " + $(window).height());
-                         scrollTop();
-                         $(window).animate({top: '0px'});
-                         console.log("REPOSITION WINDOW");
-                         return false;
-                         });
-    </script>
-  
-  </head>
+</head>
     
     
  <!-- START BODY !-->
@@ -647,7 +625,7 @@
       }
       //  addTweet(this.from_user, since, this.text, this.profile_image_url);
       void appendTweet(profileName, theDate, theText, thePicUrl, tID){
-          console.log("APPEND TWEET");
+          /// console.log("APPEND TWEET");
           //// ADD TEXT SPAWN
           if(theText != "null" || theTweet != "" || theTweet){
           try{
@@ -687,66 +665,6 @@
           tweetPositionVert()
       }
       
-
-      
-      /// does the initial spawn
-      void spawnText(){
-
-          /*
-          int prevBoxH = 0;
-          int totalBoxH = 0;
-          
-          // If we haven't created the text objects, do it now
-          
-              console.log("spawn text objects: " + tweets.size());
-              for (int i = 0; i < tweets.size(); i++) {
-			
-              Tweet t = (Tweet) tweets.get(i);
-              /// get tweet data
-              String msg = t.text;
-              String usrName = t.profileName;
-			  String theDate = t.date;
-              String theImagePath = t.profileImageUrl;
-              // console.log("Name: " + t.profileName);
-              
-              // set profile image into tweet object by
-              // loading a PImage of the profile pic
-              // this may be the canvas taint workaround
-              t.profileImage = requestImage(t.profileImageUrl);
-              // save tweet object to our hashmap list of unique tweets
-              uniqueTweets.put(t.id, t);
-
-              //// ADD TEXT SPAWN
-              theTextObject = new TextObject();
-              TextSizes[i] = tweetTextSize;
-
-              /// initialize our text object
-              theTextObject.initText(msg, usrName, theImagePath, theDate, TextSizes[i], t.id);
-              TextObjectArray.add(theTextObject);
-              /// space the objects with v spacing + the line height
-
-              theTextObject.theY = ((i*tBoxSpace) + prevBoxH) - tBoxSpace;
-              // console.log("PREV BOX HEIGHT = " + prevBoxH);
-              prevBoxH = theTextObject.textBoxH;
-              totalBoxH += prevBoxH;
-              vertScrollHeight = (tweets.size()*tBoxSpace);//  + totalBoxH;
-              
-                  
-              updateTweetReadout(tweets.size());
-              // theTextObject.theY = (i * 200)-200; /// start spawning above 0 so there's no gap
-         
-          /// get the total height of all the tweets for scrolling positioning
-          console.log("TOTAL TWEETS: " + tweets.size() + "TOTAL BOX HEIGHT = " + vertScrollHeight + " JUST SPACING: "  + tweets.size()*tBoxSpace);
-
-          totalNumTweets =  tweets.size();
-          tweets.clear(); /// why do we want to clear the tweets after this?
-		  hasTweets = true;
-          hideLoader();
-
-          }
-          */
-      }
-
     void draw() {
         background(bgColor);
         // CHECK FOR BG IMAGE
