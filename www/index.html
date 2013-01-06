@@ -191,7 +191,7 @@
         */
         /// do animation
 
-        $("#interface").animate({top: '768px'});
+        $("#interface").animate({top: '760px'});
         $("#nav-top").animate({top: '-100px'});
 
         /// toggle the overlay flag so no interface
@@ -584,7 +584,7 @@
         
       searchTerm = "twitter";
       // XXX: jbuck: "just subtract 10"
-	  size(1024, 760);
+	  size(tWidth, tHeight);
         
       colorMode(RGB, 100);
       /// size(window.innerWidth, window.innerHeight-10);
@@ -1234,7 +1234,7 @@ class Timer {
       
       <!-- INTERFACE and CONFIG !  -->
         <div id="interface">
-            <!-- HEADER CONTAINER !-->
+            <!-- INTERFACE HEADER CONTAINER !-->
             <div id="header_container">
                 <script>
                     
@@ -1276,10 +1276,6 @@ class Timer {
                     </div>
                     <div id="loading-style"><img src="images/ajax-loader.gif" width="35" height="35"></div>
                 </li>
-                <!-- 
-                <li style=" float:right" id="close-button"><a href="#" onClick="hideOverlay(); return false;"><img align="middle" src="images/butt_close.png" width="140" height="40"></a>
-                </li>
-                 !-->
                 </ul>
                 
             </div>
@@ -1325,7 +1321,6 @@ class Timer {
                     <optgroup selected="selected" label="Animation Type" value="fade">Fade</option>
                         <option value ="fade">Fade</option>
                         <option value ="scroll">Scroll</option>
-                        <option value ="wipe" >Wipe</option>
                     </optgroup>
                 </select>
             <div id="label-style" style="margin-bottom:10px;">Show Pic:</div>
