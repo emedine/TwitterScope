@@ -51,21 +51,8 @@
                                 
     <!-- main page functions -->
     <script type="text/javascript">
-	// If you want to prevent dragging, uncomment this section
-	//*
-	function preventBehavior(e)
-	{
-      // this fixes the window, but disables scrolling :(
-      e.preventDefault();
-    };
-	// document.addEventListener("touchmove", preventBehavior, false);
-	//*/
-	
-	/* If you are supporting your own protocol, the var invokeString will contain any arguments to the app launch.
-	see http://iphonedevelopertips.com/cocoa/launching-your-own-application-via-a-custom-url-scheme.html
-	for more details -jm */
-
-    ///// ONCE THE iPAD IS READY, INIT
+		
+	    ///// ONCE THE iPAD IS READY, INIT
     document.addEventListener("deviceready",onDeviceReady,false);
 
     function onDeviceReady(){
@@ -150,12 +137,12 @@
     //// configuration vars
     var configY = 500;
     var theData; // = new Lawnchair('settings'); // save object definition
-    // initial vars are null
-    var bgColorConfig = "null";
-    var fontColorConfig = "null";
+    // initial default settings
+    var bgColorConfig = "#121256";
+    var fontColorConfig = "#FFFFFF";
     var bgroundPathConfig = "null";
-    var animTypeConfig = "null";
-    var animSpeedConfig = "null";
+    var animTypeConfig = "fade";
+    var animSpeedConfig = "10";
     var showPicConfig = "null";
         
         
@@ -173,7 +160,7 @@
         topNav.style.display = "block";
         
         $("#nav-top").animate({top: '0px'});
-        $("#interface").animate({top: '410px'});
+        $("#interface").animate({top: '418px'});
 
 
     }
@@ -191,7 +178,7 @@
         */
         /// do animation
 
-        $("#interface").animate({top: '760px'});
+        $("#interface").animate({top: '768px'});
         $("#nav-top").animate({top: '-100px'});
 
         /// toggle the overlay flag so no interface
@@ -361,9 +348,11 @@
             processingInstance.setBackgroundImage(bgroundPathConfig);
             processingInstance.changeBGColor(bgColorConfig);
             processingInstance.changeFontColor(fontColorConfig);
-            processingInstance.changeAnimationType(animTypeConfig);
+            // processingInstance.changeAnimationType(animTypeConfig);
             processingInstance.changeAnimSpeed(animSpeedConfig);
             
+            changeAnim(animTypeConfig);
+           
             console.log("UPDATED");
         }
         
@@ -373,7 +362,7 @@
     //// COLOR CHANGE FUNCTIONS ///////////
     /// change background color
     function changeBackgroundColor(hexColor){
-        // console.log("INIT BG COLOR CHANGE:  " + hexColor);
+         // console.log("INIT BG COLOR CHANGE:  " + hexColor);
          Processing.getInstanceById('tweets').changeBGColor(hexColor);
         
          bgColorConfig = hexColor;
@@ -525,7 +514,7 @@
 
       /// GLOBAL PROPERTIES
       int tWidth = 1024;  /// canvas width
-      int tHeight = 760;  /// canvas height
+      int tHeight = 768;  /// canvas height
       color bgColor = #121256;
       color tFontColor = #FFFFFF;
 	  int tAnimSpeed = 2;
@@ -890,6 +879,7 @@
             try{
                 // update text object position
                 TextObject dTextObj = TextObjectArray.get(i);
+                dTextObj.fadeLevel = 255;
                 dTextObj.doScrollAnim();
                 
             } catch (Exception:e){
@@ -988,12 +978,6 @@
               
               textBoxH = 60+((numLines)*60);
              
-              // numLines = Math.round((charWidth*numChars)/textBoxW);
-              // console.log("NUM LINES: " + numLines);
-              // console.log("String: " + theTweet);
-              // console.log("lines: " + numLines + " char width: " + totalCharWidth);
-              
-              
           }
 
 		  /// DO FADE ANIMATION////////

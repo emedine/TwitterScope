@@ -96,8 +96,7 @@
                       var tweet='<div class="tweet"><div class="tweet-left"><a target="_blank" href="http://twitter.com/'+this.from_user+'"><img width="48" height="48" alt="'+this.from_user+' on Twitter" src="'+this.profile_image_url+'" /></a></div><div class="tweet-right"><p class="text">'+this.text.linkify().linkuser().linktag().replace(/<a/g,'<a target="_blank"')+'<br />'+tweetBy+'</p></div><br style="clear: both;" /></div>';
 
                       /// $("#twitter-widget").append(tweet); //add the tweet...
-                    // this calls to the javascript function
-                      // TweetPicArray.push(this.profile_image_url);
+                    // this calls to the javascript function;
                       addTweet(this.from_user, since, this.text, this.profile_image_url);
 
                 });
