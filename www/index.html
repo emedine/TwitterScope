@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-  <title>CineTweet</title>
+  <title>PresenTweetion</title>
   
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" /> previous scalability-->
     <meta name="viewport" content="width=device-width, initial-scale="1"">
@@ -38,8 +38,11 @@
         
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type="text/javascript" src="js/farbtastic.js"></script>
-    <script type="text/javascript" charset="utf-8" src="twitter-search-api.js"></script>
         
+    <!--- twitter search api --->
+    <script type="text/javascript" src="js/sha1.js"></script>
+    <script type="text/javascript" src="js/codebird.js"></script>
+     
     <!-- jquery mobile  !-->   
     <script src="js/jquery.mobile-1.2.0.min.js"></script>
         
@@ -73,8 +76,6 @@
     }
         
         
-
-        
 	function onBodyLoad()
 	{
 
@@ -100,9 +101,11 @@
                                                     processingInstance = Processing.getInstanceById('tweets');
                                                     
                                                     }
+                                                    /// reset search parameters
                                                     processingInstance.clearSearch();
+                                                    //
+                                                    doSearch(searchTerm);
                                                     e.preventDefault();
-                                                    JQUERY4U.WIDGETS.TWITTER.init(searchTerm);
                                                     });
         
 	}
@@ -127,6 +130,82 @@
             
         }
     }
+        
+        
+    ////// TWITTER SEARCH ///////////
+    function doSearch(tSearch){
+        console.log("searching");
+        var theName;
+        var theProfileImg;
+        var theText;
+        var theTime;
+        cb.__call(
+                'search_tweets',
+                'q=' + tSearch + '&count=100',
+                    function (reply) {
+
+                      var jsonObject = reply;
+                      
+                      var theStatuses = jsonObject.statuses;
+                  /*
+                      console.log("root: ");
+                      var count = 0;
+                      console.log("//////////////////////////////////: ");
+                      console.log("var j in statuses: " + count);
+                      console.log("//////////////////////////////////: ");
+                      count++;
+                   */
+                      
+                      for (var j in theStatuses) {
+                        var theStatus = theStatuses[j];
+                        for (var k in theStatus) {
+                        /// check user info
+                        if(k == "user"){
+                        // console.log(k + " the value: " + theStatus[k]);
+                        var theUser = theStatus[k];
+                        for (var l in theUser) {
+                        // console.log("User info: " + l + " the value: " + theStatus[k][l]);
+                      
+                        if(l == "profile_image_url"){
+                            // console.log("profile image: " + theStatus[k][l]);
+                            theProfileImg = theStatus[k][l];
+                        }
+                        if(l == "screen_name"){
+                            // console.log("screen name: " + theStatus[k][l]);
+                            theName = theStatus[k][l];
+                        }
+                      
+                        }
+                      }
+                      
+                      if(k == "created_at"){
+                        // console.log(k + " the value: " + theStatus[k]);
+                        theTime = theStatus[k];
+                      }
+                      if(k == "text"){
+                        theText = theStatus[k];
+                      }
+                    }
+                  
+                  //// console.log(theName + " " + theProfileImg + " " + theTime + " " + theText);
+                  addTweet(theName, theTime, theText, theProfileImg);
+                  
+                  }
+                  
+            },
+            true // this parameter required
+        );
+    }
+        
+    ////////////////////////////////////////
+    /////// JQUERY APP VARS
+    ////////////////////////////////////////
+        
+    //// twitter vars ////
+    var cb = new Codebird;
+    cb.setConsumerKey('zTfNzVvBVrHq0Hv0j5vx4g', 'TglErCZgIrvK5wt9LYoeySLsEY8libNVR0XrwDy2Qlo');
+    cb.setToken('258118580-nySUQkSJkVQq6lI4uy6QOlocSdoGIDZTf8NMJka4', 'Nu3kH0r7dzK45SONgJSxbwWeRC6g5ecE0zWQegr2uc'); 
+        
     /// interface vars
     var theOverlay; /// help overlay
     var theLoader; // loader object
@@ -210,6 +289,7 @@
     function updateTweetReadout(numTweets){
         var readoutNums = document.getElementById("num-tweet-readout");
         readoutNums.value = numTweets;
+        hideLoader();
    
             
     }
@@ -259,7 +339,6 @@
                 
         }
 
-        // appendTweet(profileName, theDate, theText, thePicUrl){
         processingInstance.appendTweet(theName, theDate, theText, theURL);
    
     }
@@ -642,12 +721,14 @@
           
           // update readout
           updateTweetReadout(TextObjectArray.size());
+          /// console.log("Text object array: " + TextObjectArray.size());
           
           hasTweets = true;
+              
           } catch (Exception e){
               
               console.log("Cant't add: " + msg + " " + theText + e);
-          }
+            }
           }
           
           /// should do position sort right about here
@@ -1038,20 +1119,17 @@
 				}
 			}
               
-              // do the "from" name
-			  //// draw the text box
+              // do the "from" name, set up color and spacing
               fill(tFontColor, fadeLevel);
  			  textAlign(CENTER);
               /// "from" text
               string headerText = tweetName + "   ..." + tweetTime;
               textFont(ItalicFont, tSize);
-              text(tweetName + "   ..." + tweetTime, theMargin + picWidth, 300, textBoxW, textBoxH);
-              // text(tweetName + "   ..." + tweetTime, 45 + thePadding, 300, textBoxW, textBoxH);
+
               /// draw the image
-              
               if(showPic){
                   picWidth = 60;
-              
+                  
                   try{
                       // String picPath = tweetPicPath; // "618px-Trollface_HD.png"; //
                       // tweetPic = loadImage(picPath);
@@ -1064,9 +1142,11 @@
               } else {
                   picWidth = 0;
               }
+              // do header and name text
+              text(tweetName + "   ..." + tweetTime, theMargin + picWidth, 300, textBoxW, textBoxH);
+              // text(tweetName + "   ..." + tweetTime, 45 + thePadding, 300, textBoxW, textBoxH);
 
-              
-              /// tweet text
+              /// do the tweet text
 			  textFont(BasicFont,tSize);
 			  text(tweetText, 45, 300 + lineHeight, textBoxW, textBoxH);
               textWidth(1024);
@@ -1125,7 +1205,7 @@
 	 
        // end text object ///////
       
-   // TIMER CLASS for ANIMATION ////////
+// TIMER CLASS for ANIMATION ////////
 class Timer {
  
   int savedTime; // When Timer started
